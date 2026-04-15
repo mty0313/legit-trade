@@ -60,6 +60,10 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         var hoveredIndex = tradeListWidget.getHoveredTradeIndex(mouseX - this.x, mouseY - this.y);
         if (hoveredIndex.isPresent()) {
             TradeConfig.TradeEntry trade = TradeConfig.getTrades().get(hoveredIndex.getAsInt());
+            // Skip tooltip for invalid trades
+            if (trade.getInputItem() == null || trade.getOutputItem() == null) {
+                return;
+            }
             int availableCount = handler.getItemCountInInventory(trade.getInputItem());
             boolean canExecute = availableCount >= trade.inputCount;
 

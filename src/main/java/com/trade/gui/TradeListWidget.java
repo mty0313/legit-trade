@@ -49,7 +49,14 @@ public class TradeListWidget {
             TradeConfig.TradeEntry trade = trades.get(tradeIndex);
             int entryY = y + i * ENTRY_HEIGHT;
 
-            int availableCount = handler != null ? handler.getItemCountInInventory(trade.getInputItem()) : 0;
+            // Skip rendering if items are invalid
+            var inputItemObj = trade.getInputItem();
+            var outputItemObj = trade.getOutputItem();
+            if (inputItemObj == null || outputItemObj == null) {
+                continue;
+            }
+
+            int availableCount = handler != null ? handler.getItemCountInInventory(inputItemObj) : 0;
             boolean canExecute = availableCount >= trade.inputCount;
             boolean isHovered = isMouseOverEntry(mouseX, mouseY, i);
 
@@ -58,7 +65,7 @@ public class TradeListWidget {
             context.fill(x, entryY, x + ENTRY_WIDTH, entryY + ENTRY_HEIGHT - 1, bgColor);
 
             // Input item icon
-            ItemStack inputItem = new ItemStack(trade.getInputItem(), trade.inputCount);
+            ItemStack inputItem = new ItemStack(inputItemObj, trade.inputCount);
             context.drawItem(inputItem, x + 4, entryY + 2);
             context.drawItemInSlot(textRenderer, inputItem, x + 4, entryY + 2);
 
@@ -66,7 +73,7 @@ public class TradeListWidget {
             context.drawText(textRenderer, "→", x + 26, entryY + 6, 0xFFFFFF, false);
 
             // Output item icon
-            ItemStack outputItem = new ItemStack(trade.getOutputItem(), trade.outputCount);
+            ItemStack outputItem = new ItemStack(outputItemObj, trade.outputCount);
             context.drawItem(outputItem, x + 40, entryY + 2);
             context.drawItemInSlot(textRenderer, outputItem, x + 40, entryY + 2);
 
@@ -104,6 +111,10 @@ public class TradeListWidget {
                 int tradeIndex = scrollOffset + i;
                 if (tradeIndex < trades.size()) {
                     TradeConfig.TradeEntry trade = trades.get(tradeIndex);
+                    // Skip invalid trades
+                    if (trade.getInputItem() == null || trade.getOutputItem() == null) {
+                        return false;
+                    }
                     int availableCount = handler != null ? handler.getItemCountInInventory(trade.getInputItem()) : 0;
                     if (availableCount >= trade.inputCount) {
                         ExecuteTradePacket.sendToServer(tradeIndex);
