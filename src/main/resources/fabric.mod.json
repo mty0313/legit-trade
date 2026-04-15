@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "legittrade",
+	"version": "${version}",
+	"name": "Legit Trade",
+	"description": "Totally legitimate trading for survival mode",
+	"authors": [],
+	"contact": {},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.trade.LegitTrade"
+		],
+		"client": [
+			"com.trade.LegitTradeClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.14.23",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": ">=0.90.4+1.20.1"
+	}
+}

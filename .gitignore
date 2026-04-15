@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.code-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Java
+*.class
+*.jar
+*.log
+*.ctxt
+hs_err_pid*
+
+# Minecraft run directories
+run/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config (if any)
+*.local
