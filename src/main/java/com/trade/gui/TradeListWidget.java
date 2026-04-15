@@ -49,7 +49,7 @@ public class TradeListWidget {
             TradeConfig.TradeEntry trade = trades.get(tradeIndex);
             int entryY = y + i * ENTRY_HEIGHT;
 
-            // Skip rendering if items are invalid
+            // Skip rendering and interaction for invalid trades
             var inputItemObj = trade.getInputItem();
             var outputItemObj = trade.getOutputItem();
             if (inputItemObj == null || outputItemObj == null) {
@@ -109,17 +109,17 @@ public class TradeListWidget {
         for (int i = 0; i < visibleEntries; i++) {
             if (isMouseOverEntry((int) mouseX, (int) mouseY, i)) {
                 int tradeIndex = scrollOffset + i;
-                if (tradeIndex < trades.size()) {
-                    TradeConfig.TradeEntry trade = trades.get(tradeIndex);
-                    // Skip invalid trades
-                    if (trade.getInputItem() == null || trade.getOutputItem() == null) {
-                        return false;
-                    }
-                    int availableCount = handler != null ? handler.getItemCountInInventory(trade.getInputItem()) : 0;
-                    if (availableCount >= trade.inputCount) {
-                        ExecuteTradePacket.sendToServer(tradeIndex);
-                        return true;
-                    }
+                if (tradeIndex >= trades.size()) continue;
+
+                TradeConfig.TradeEntry trade = trades.get(tradeIndex);
+                // Skip invalid trades
+                if (trade.getInputItem() == null || trade.getOutputItem() == null) {
+                    continue;
+                }
+                int availableCount = handler != null ? handler.getItemCountInInventory(trade.getInputItem()) : 0;
+                if (availableCount >= trade.inputCount) {
+                    ExecuteTradePacket.sendToServer(tradeIndex);
+                    return true;
                 }
             }
         }

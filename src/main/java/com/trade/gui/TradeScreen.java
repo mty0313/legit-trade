@@ -39,8 +39,8 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         context.drawText(this.textRenderer, this.title, this.titleX, this.titleY, 4210752, false);
 
-        // Render trade list
-        tradeListWidget.render(context, this.textRenderer, mouseX - this.x, mouseY - this.y);
+        // Render trade list (mouseX/mouseY already relative to GUI)
+        tradeListWidget.render(context, this.textRenderer, mouseX, mouseY);
     }
 
     @Override
