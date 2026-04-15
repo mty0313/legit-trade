@@ -1,6 +1,8 @@
 package com.trade.block;
 
+import com.trade.TradeConfig;
 import com.trade.gui.TradeScreenHandler;
+import com.trade.network.ConfigSyncPacket;
 import com.trade.network.TradePackets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,6 +24,10 @@ public class TradeBlock extends Block {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
+            // Sync config before opening screen
+            if (player instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+                ConfigSyncPacket.sendToClient(serverPlayer);
+            }
             player.openHandledScreen(createScreenHandlerFactory());
         }
         return ActionResult.SUCCESS;

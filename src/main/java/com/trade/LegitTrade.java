@@ -2,10 +2,12 @@ package com.trade;
 
 import com.trade.gui.TradeScreenHandler;
 import com.trade.network.ConfigSyncPacket;
+import com.trade.network.ExecuteTradePacket;
 import com.trade.network.TradePackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
@@ -18,10 +20,12 @@ public class LegitTrade implements ModInitializer {
         TradeConfig.load();
         TradeBlocks.register();
         TradePackets.register();
+        ExecuteTradePacket.registerServer();
 
-        // Sync config when player joins
-        ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
-            if (entity instanceof net.minecraft.server.network.ServerPlayerEntity player) {
+        // Sync config when player joins (use ServerPlayConnectionEvents for proper timing)
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            // Send config to all players on the server
+            for (net.minecraft.server.network.ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 ConfigSyncPacket.sendToClient(player);
             }
         });
@@ -29,6 +33,8 @@ public class LegitTrade implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(CommandManager.literal("trade")
                 .executes(ctx -> {
+                    // Sync config before opening screen
+                    ConfigSyncPacket.sendToClient(ctx.getSource().getPlayer());
                     ctx.getSource().getPlayer().openHandledScreen(
                         new SimpleNamedScreenHandlerFactory(
                             (syncId, playerInventory, player) -> new TradeScreenHandler(syncId, playerInventory),

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "legittrade:block/trade_block"
+    }
+  }
+}
