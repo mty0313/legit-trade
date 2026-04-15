@@ -17,8 +17,8 @@ public class ConfigSyncPacket {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeInt(trades.size());
         for (TradeConfig.TradeEntry trade : trades) {
-            buf.writeString(trade.input);
-            buf.writeString(trade.output);
+            buf.writeString(trade.input, 32767);
+            buf.writeString(trade.output, 32767);
             buf.writeInt(trade.inputCount);
             buf.writeInt(trade.outputCount);
             buf.writeInt(trade.xpReward);
@@ -30,8 +30,8 @@ public class ConfigSyncPacket {
         int size = buf.readInt();
         List<TradeConfig.TradeEntry> trades = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            String input = buf.readString();
-            String output = buf.readString();
+            String input = buf.readString(32767);
+            String output = buf.readString(32767);
             int inputCount = buf.readInt();
             int outputCount = buf.readInt();
             int xpReward = buf.readInt();

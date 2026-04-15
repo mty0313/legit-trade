@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,54 +17,79 @@ import java.util.Collections;
 import java.util.List;
 
 public class TradeConfig {
-	private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
-	private static volatile List<TradeEntry> trades = Collections.emptyList();
+    private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
+    private static volatile List<TradeEntry> trades = Collections.emptyList();
 
-	public static List<TradeEntry> getTrades() {
-		return trades;
-	}
+    public static List<TradeEntry> getTrades() {
+        return trades;
+    }
 
-	public static void setTrades(List<TradeEntry> newTrades) {
-		trades = Collections.unmodifiableList(newTrades != null ? newTrades : Collections.emptyList());
-	}
+    public static void setTrades(List<TradeEntry> newTrades) {
+        trades = Collections.unmodifiableList(newTrades != null ? newTrades : Collections.emptyList());
+    }
 
-	public static final class TradeEntry {
-		public final String input;
-		public final String output;
-		public final int inputCount;
-		public final int outputCount;
-		public final int xpReward;
+    public static final class TradeEntry {
+        public final String input;
+        public final String output;
+        public final int inputCount;
+        public final int outputCount;
+        public final int xpReward;
 
-		public TradeEntry(String input, String output, int inputCount, int outputCount, int xpReward) {
-			this.input = input;
-			this.output = output;
-			this.inputCount = inputCount;
-			this.outputCount = outputCount;
-			this.xpReward = xpReward;
-		}
+        public TradeEntry(String input, String output, int inputCount, int outputCount, int xpReward) {
+            this.input = input;
+            this.output = output;
+            this.inputCount = inputCount;
+            this.outputCount = outputCount;
+            this.xpReward = xpReward;
+        }
 
-		public Item getInputItem() {
-			Identifier id = Identifier.tryParse(input);
-			return id != null ? Registries.ITEM.get(id) : null;
-		}
+        public Item getInputItem() {
+            Identifier id = Identifier.tryParse(input);
+            return id != null ? Registries.ITEM.get(id) : null;
+        }
 
-		public Item getOutputItem() {
-			Identifier id = Identifier.tryParse(output);
-			return id != null ? Registries.ITEM.get(id) : null;
-		}
+        public Item getOutputItem() {
+            Identifier id = Identifier.tryParse(output);
+            return id != null ? Registries.ITEM.get(id) : null;
+        }
 
-		public boolean isValid() {
-			Identifier inputId = Identifier.tryParse(input);
-			Identifier outputId = Identifier.tryParse(output);
-			if (inputId == null || outputId == null) {
-				return false;
-			}
-			if (!Registries.ITEM.containsId(inputId) || !Registries.ITEM.containsId(outputId)) {
-				return false;
-			}
-			return inputCount > 0 && outputCount > 0 && xpReward >= 0;
-		}
-	}
+        public boolean isValid() {
+            Identifier inputId = Identifier.tryParse(input);
+            Identifier outputId = Identifier.tryParse(output);
+            if (inputId == null || outputId == null) {
+                return false;
+            }
+            if (!Registries.ITEM.containsId(inputId) || !Registries.ITEM.containsId(outputId)) {
+                return false;
+            }
+            return inputCount > 0 && outputCount > 0 && xpReward >= 0;
+        }
+
+        public int countItemsInInventory(ServerPlayerEntity player) {
+            int count = 0;
+            var inventory = player.getInventory();
+            for (int i = 0; i < inventory.size(); i++) {
+                var stack = inventory.getStack(i);
+                if (stack.getItem() == getInputItem() && !stack.isEmpty()) {
+                    count += stack.getCount();
+                }
+            }
+            return count;
+        }
+
+        public void consumeItems(ServerPlayerEntity player, int amount) {
+            var inventory = player.getInventory();
+            int remaining = amount;
+            for (int i = 0; i < inventory.size() && remaining > 0; i++) {
+                var stack = inventory.getStack(i);
+                if (stack.getItem() == getInputItem() && !stack.isEmpty()) {
+                    int take = Math.min(remaining, stack.getCount());
+                    stack.decrement(take);
+                    remaining -= take;
+                }
+            }
+        }
+    }
 
 	// Gson deserialization target - uses mutable fields
 	private static final class RawTradeEntry {

@@ -50,14 +50,14 @@ public class ExecuteTradePacket {
         }
 
         // Count total input items in player inventory
-        int totalCount = countItems(player, trade.getInputItem());
+        int totalCount = trade.countItemsInInventory(player);
         if (totalCount < trade.inputCount) {
             sendFailure(player, "Insufficient items");
             return;
         }
 
         // Consume input from multiple stacks if needed
-        consumeItems(player, trade.getInputItem(), trade.inputCount);
+        trade.consumeItems(player, trade.inputCount);
 
         // Give output
         ItemStack output = new ItemStack(trade.getOutputItem(), trade.outputCount);
@@ -68,31 +68,6 @@ public class ExecuteTradePacket {
         // Give XP
         player.addExperience(trade.xpReward);
         player.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
-    }
-
-    private static int countItems(ServerPlayerEntity player, net.minecraft.item.Item item) {
-        int count = 0;
-        var inventory = player.getInventory();
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack stack = inventory.getStack(i);
-            if (stack.getItem() == item && !stack.isEmpty()) {
-                count += stack.getCount();
-            }
-        }
-        return count;
-    }
-
-    private static void consumeItems(ServerPlayerEntity player, net.minecraft.item.Item item, int amount) {
-        var inventory = player.getInventory();
-        int remaining = amount;
-        for (int i = 0; i < inventory.size() && remaining > 0; i++) {
-            ItemStack stack = inventory.getStack(i);
-            if (stack.getItem() == item && !stack.isEmpty()) {
-                int take = Math.min(remaining, stack.getCount());
-                stack.decrement(take);
-                remaining -= take;
-            }
-        }
     }
 
     private static void sendFailure(ServerPlayerEntity player, String message) {

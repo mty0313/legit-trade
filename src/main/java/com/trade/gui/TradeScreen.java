@@ -12,13 +12,15 @@ import net.minecraft.util.Identifier;
 @Environment(EnvType.CLIENT)
 public class TradeScreen extends HandledScreen<TradeScreenHandler> {
     private static final Identifier TEXTURE = new Identifier("minecraft", "textures/gui/container/generic_54.png");
+    private static final int BACKGROUND_WIDTH = 176;
+    private static final int BACKGROUND_HEIGHT = 166;
 
     private final TradeListWidget tradeListWidget;
 
     public TradeScreen(TradeScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        this.backgroundWidth = 176;
-        this.backgroundHeight = 166;
+        this.backgroundWidth = BACKGROUND_WIDTH;
+        this.backgroundHeight = BACKGROUND_HEIGHT;
         this.playerInventoryTitleY = this.backgroundHeight - 94;
 
         this.tradeListWidget = new TradeListWidget(18, 18, 5);
@@ -27,12 +29,12 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        int x = (this.width - this.backgroundWidth) / 2;
-        int y = (this.height - this.backgroundHeight) / 2;
+        int x = (this.width - BACKGROUND_WIDTH) / 2;
+        int y = (this.height - BACKGROUND_HEIGHT) / 2;
 
         // Main background
-        context.drawTexture(TEXTURE, x, y, 0, 0, this.backgroundWidth, 35);
-        context.drawTexture(TEXTURE, x, y + 35, 0, 125, this.backgroundWidth, 98);
+        context.drawTexture(TEXTURE, x, y, 0, 0, BACKGROUND_WIDTH, 35);
+        context.drawTexture(TEXTURE, x, y + 35, 0, 125, BACKGROUND_WIDTH, 98);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
             if (trade.getInputItem() == null || trade.getOutputItem() == null) {
                 return;
             }
-            int availableCount = handler.getItemCountInInventory(trade.getInputItem());
+            int availableCount = handler != null ? trade.countItemsInInventory(handler.getServerPlayer()) : 0;
             boolean canExecute = availableCount >= trade.inputCount;
 
             Text tooltip;

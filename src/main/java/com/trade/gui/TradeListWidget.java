@@ -7,11 +7,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.OptionalInt;
 
 @Environment(EnvType.CLIENT)
 public class TradeListWidget {
+    private static final Logger LOGGER = LoggerFactory.getLogger("TradeListWidget");
     private static final int ENTRY_HEIGHT = 20;
     private static final int ENTRY_WIDTH = 140;
 
@@ -39,26 +43,39 @@ public class TradeListWidget {
         var trades = TradeConfig.getTrades();
         int totalTrades = trades.size();
 
-        // Background
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("render: totalTrades={} x={} y={} visibleEntries={}", totalTrades, x, y, visibleEntries);
+            LOGGER.debug("scrollOffset={}", scrollOffset);
+        }
+
+        // Background (coordinates are relative to GUI origin)
         context.fill(x, y, x + ENTRY_WIDTH, y + visibleEntries * ENTRY_HEIGHT, 0xFF373737);
 
-        for (int i = 0; i < visibleEntries; i++) {
-            int tradeIndex = scrollOffset + i;
-            if (tradeIndex >= totalTrades) break;
-
+        int renderedIndex = 0;
+        for (int tradeIndex = scrollOffset; renderedIndex < visibleEntries && tradeIndex < totalTrades; tradeIndex++) {
             TradeConfig.TradeEntry trade = trades.get(tradeIndex);
-            int entryY = y + i * ENTRY_HEIGHT;
+            int entryY = y + renderedIndex * ENTRY_HEIGHT;
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Rendering tradeIndex={} renderedIndex={}", tradeIndex, renderedIndex);
+                LOGGER.debug("  trade: input={} output={}", trade.input, trade.output);
+            }
 
             // Skip rendering and interaction for invalid trades
             var inputItemObj = trade.getInputItem();
             var outputItemObj = trade.getOutputItem();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("  inputItemObj={} outputItemObj={}", inputItemObj, outputItemObj);
+            }
+
             if (inputItemObj == null || outputItemObj == null) {
+                LOGGER.warn("SKIPPING: invalid items");
                 continue;
             }
 
-            int availableCount = handler != null ? handler.getItemCountInInventory(inputItemObj) : 0;
+            int availableCount = handler != null ? trade.countItemsInInventory(handler.getServerPlayer()) : 0;
             boolean canExecute = availableCount >= trade.inputCount;
-            boolean isHovered = isMouseOverEntry(mouseX, mouseY, i);
+            boolean isHovered = isMouseOverEntry(mouseX, mouseY, renderedIndex);
 
             // Entry background
             int bgColor = isHovered ? 0xFF4A4A4A : 0xFF2A2A2A;
@@ -90,14 +107,8 @@ public class TradeListWidget {
                 String countText = availableCount + "/" + trade.inputCount;
                 context.drawText(textRenderer, countText, x + ENTRY_WIDTH - 30, entryY + 6, 0xFFAA00, false);
             }
-        }
 
-        // Scroll indicators
-        if (scrollOffset > 0) {
-            context.drawText(textRenderer, "▲", x + ENTRY_WIDTH / 2 - 4, y - 10, 0xFFFFFF, false);
-        }
-        if (scrollOffset + visibleEntries < totalTrades) {
-            context.drawText(textRenderer, "▼", x + ENTRY_WIDTH / 2 - 4, y + visibleEntries * ENTRY_HEIGHT + 2, 0xFFFFFF, false);
+            renderedIndex++;
         }
     }
 
@@ -105,23 +116,22 @@ public class TradeListWidget {
         if (button != 0) return false;
 
         var trades = TradeConfig.getTrades();
+        int renderedIndex = 0;
 
-        for (int i = 0; i < visibleEntries; i++) {
-            if (isMouseOverEntry((int) mouseX, (int) mouseY, i)) {
-                int tradeIndex = scrollOffset + i;
-                if (tradeIndex >= trades.size()) continue;
-
+        for (int tradeIndex = scrollOffset; renderedIndex < visibleEntries && tradeIndex < trades.size(); tradeIndex++) {
+            if (isMouseOverEntry((int) mouseX, (int) mouseY, renderedIndex)) {
                 TradeConfig.TradeEntry trade = trades.get(tradeIndex);
                 // Skip invalid trades
                 if (trade.getInputItem() == null || trade.getOutputItem() == null) {
                     continue;
                 }
-                int availableCount = handler != null ? handler.getItemCountInInventory(trade.getInputItem()) : 0;
+                int availableCount = handler != null ? trade.countItemsInInventory(handler.getServerPlayer()) : 0;
                 if (availableCount >= trade.inputCount) {
                     ExecuteTradePacket.sendToServer(tradeIndex);
                     return true;
                 }
             }
+            renderedIndex++;
         }
         return false;
     }
@@ -129,7 +139,7 @@ public class TradeListWidget {
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!isMouseOver((int) mouseX, (int) mouseY)) return false;
 
-        int maxScroll = Math.max(0, TradeConfig.getTrades().size() - visibleEntries);
+        int maxScroll = Math.max(0, getTotalTrades() - visibleEntries);
         scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) amount));
         return true;
     }
@@ -147,18 +157,30 @@ public class TradeListWidget {
 
     public OptionalInt getHoveredTradeIndex(int mouseX, int mouseY) {
         var trades = TradeConfig.getTrades();
-        for (int i = 0; i < visibleEntries; i++) {
-            if (isMouseOverEntry(mouseX, mouseY, i)) {
-                int tradeIndex = scrollOffset + i;
-                if (tradeIndex < trades.size()) {
+        int renderedIndex = 0;
+        for (int tradeIndex = scrollOffset; renderedIndex < visibleEntries && tradeIndex < trades.size(); tradeIndex++) {
+            if (isMouseOverEntry(mouseX, mouseY, renderedIndex)) {
+                TradeConfig.TradeEntry trade = trades.get(tradeIndex);
+                if (trade.getInputItem() != null && trade.getOutputItem() != null) {
                     return OptionalInt.of(tradeIndex);
                 }
             }
+            renderedIndex++;
         }
         return OptionalInt.empty();
     }
 
     public boolean hasTrades() {
         return !TradeConfig.getTrades().isEmpty();
+    }
+
+    private int countValidTrades(List<TradeConfig.TradeEntry> trades) {
+        int count = 0;
+        for (TradeConfig.TradeEntry entry : trades) {
+            if (entry.getInputItem() != null && entry.getOutputItem() != null) {
+                count++;
+            }
+        }
+        return count;
     }
 }

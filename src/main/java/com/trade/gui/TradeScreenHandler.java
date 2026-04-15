@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class TradeScreenHandler extends ScreenHandler {
     private final PlayerEntity player;
@@ -31,16 +32,8 @@ public class TradeScreenHandler extends ScreenHandler {
         return player;
     }
 
-    public int getItemCountInInventory(net.minecraft.item.Item item) {
-        int count = 0;
-        var inventory = player.getInventory();
-        for (int i = 0; i < inventory.size(); i++) {
-            ItemStack stack = inventory.getStack(i);
-            if (stack.getItem() == item && !stack.isEmpty()) {
-                count += stack.getCount();
-            }
-        }
-        return count;
+    public ServerPlayerEntity getServerPlayer() {
+        return (ServerPlayerEntity) player;
     }
 
     @Override
