@@ -49,15 +49,15 @@ public class ExecuteTradePacket {
             return;
         }
 
-        // Find input items in player inventory
-        ItemStack inputStack = findItemStack(player, trade.getInputItem());
-        if (inputStack == null || inputStack.getCount() < trade.inputCount) {
+        // Count total input items in player inventory
+        int totalCount = countItems(player, trade.getInputItem());
+        if (totalCount < trade.inputCount) {
             sendFailure(player, "Insufficient items");
             return;
         }
 
-        // Consume input
-        inputStack.decrement(trade.inputCount);
+        // Consume input from multiple stacks if needed
+        consumeItems(player, trade.getInputItem(), trade.inputCount);
 
         // Give output
         ItemStack output = new ItemStack(trade.getOutputItem(), trade.outputCount);
@@ -70,16 +70,29 @@ public class ExecuteTradePacket {
         player.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
     }
 
-    private static ItemStack findItemStack(ServerPlayerEntity player, net.minecraft.item.Item item) {
-        // Search main inventory first, then hotbar
+    private static int countItems(ServerPlayerEntity player, net.minecraft.item.Item item) {
+        int count = 0;
         var inventory = player.getInventory();
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack stack = inventory.getStack(i);
             if (stack.getItem() == item && !stack.isEmpty()) {
-                return stack;
+                count += stack.getCount();
             }
         }
-        return null;
+        return count;
+    }
+
+    private static void consumeItems(ServerPlayerEntity player, net.minecraft.item.Item item, int amount) {
+        var inventory = player.getInventory();
+        int remaining = amount;
+        for (int i = 0; i < inventory.size() && remaining > 0; i++) {
+            ItemStack stack = inventory.getStack(i);
+            if (stack.getItem() == item && !stack.isEmpty()) {
+                int take = Math.min(remaining, stack.getCount());
+                stack.decrement(take);
+                remaining -= take;
+            }
+        }
     }
 
     private static void sendFailure(ServerPlayerEntity player, String message) {

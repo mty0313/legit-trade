@@ -15,7 +15,7 @@ The target Minecraft version is 1.20.1.
 
 # LegitTrade
 
-Fabric 1.20.1 交易mod。"完全合法"的生存模式物品交换。
+Fabric 1.20.1 交易 mod。"完全合法"的生存模式物品交换。
 
 ## 构建
 
@@ -23,7 +23,7 @@ Fabric 1.20.1 交易mod。"完全合法"的生存模式物品交换。
 ./gradlew build
 ```
 
-输出: `build/libs/legittrade-1.0.0.jar`
+输出：`build/libs/legittrade-1.0.0.jar`
 
 ## 使用
 
@@ -33,15 +33,19 @@ Fabric 1.20.1 交易mod。"完全合法"的生存模式物品交换。
 
 ## 交易界面
 
-1. 左侧槽位放入输入物品
-2. 右侧槽位显示输出预览（匹配配置时显示）
-3. 点击输出物品执行交易
-4. 交易成功：消耗输入物品，获得输出物品 + 经验，播放村民交易音效
-5. 交易失败：播放失败音效，显示红色错误提示
+列表式交易界面（类似村民交易 UI）：
+
+1. 滚动浏览所有可用交易配方
+2. 每个配方显示：输入物品 → 输出物品 + XP 奖励
+3. 绿色 ✓ 表示当前物品足够，可执行交易
+4. 橙色显示当前拥有数量/需求数量（物品不足时）
+5. 点击配方执行交易
+6. 交易成功：消耗输入物品，获得输出物品 + 经验，播放村民交易音效
+7. 交易失败：播放失败音效，显示红色错误提示
 
 ## 配置
 
-路径: `config/legittrade.json`
+路径：`config/legittrade.json`
 
 ```json
 [
@@ -56,8 +60,8 @@ Fabric 1.20.1 交易mod。"完全合法"的生存模式物品交换。
 ```
 
 字段:
-- `input` - 输入物品ID（必须为有效的物品注册ID）
-- `output` - 输出物品ID（必须为有效的物品注册ID）
+- `input` - 输入物品 ID（必须为有效的物品注册 ID）
+- `output` - 输出物品 ID（必须为有效的物品注册 ID）
 - `inputCount` - 消耗数量（必须 > 0）
 - `outputCount` - 获得数量（必须 > 0）
 - `xpReward` - 经验奖励（必须 >= 0）
@@ -69,24 +73,25 @@ Fabric 1.20.1 交易mod。"完全合法"的生存模式物品交换。
 ```
 src/main/java/com/trade/
 ├── LegitTrade.java           # 主入口，命令注册
-├── LegitTradeClient.java     # 客户端入口，Screen注册
+├── LegitTradeClient.java     # 客户端入口，Screen 注册
 ├── TradeConfig.java          # 配置加载与验证
 ├── TradeBlocks.java          # 方块注册
 ├── block/TradeBlock.java     # 交易方块
 ├── gui/
-│   ├── TradeScreen.java      # 客户端GUI渲染
+│   ├── TradeScreen.java      # 客户端 GUI 渲染
+│   ├── TradeListWidget.java  # 交易列表组件
 │   └── TradeScreenHandler.java # 服务端交易逻辑
 └── network/
-    ├── TradePackets.java     # ScreenHandler注册
-    └── ConfigSyncPacket.java # 服务端→客户端配置同步
+    ├── TradePackets.java     # ScreenHandler 注册
+    ├── ConfigSyncPacket.java # 服务端→客户端配置同步
+    └── ExecuteTradePacket.java # 客户端→服务端交易请求
 ```
 
 ## 技术细节
 
-- **配置同步：** 玩家加入时自动同步配置到客户端，确保GUI显示正确
+- **配置同步：** 玩家加入时自动同步配置到客户端，确保 GUI 显示正确
 - **线程安全：** `TradeEntry` 为不可变类，配置列表使用不可变包装
-- **输入验证：** 物品ID使用 `Identifier.tryParse()` 防止格式错误崩溃
-- **虚拟槽位：** 输出槽为虚拟槽位，点击时服务端执行交易逻辑
+- **输入验证：** 物品 ID 使用 `Identifier.tryParse()` 防止格式错误崩溃
 
 ## 依赖
 
