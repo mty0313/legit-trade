@@ -2,6 +2,7 @@ package com.trade;
 
 import com.trade.gui.TradeScreenHandler;
 import com.trade.network.ConfigSyncPacket;
+import com.trade.network.ExecuteTradePacket;
 import com.trade.network.TradePackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -18,6 +19,7 @@ public class LegitTrade implements ModInitializer {
         TradeConfig.load();
         TradeBlocks.register();
         TradePackets.register();
+        ExecuteTradePacket.registerServer();
 
         // Sync config when player joins
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
