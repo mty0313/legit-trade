@@ -30,9 +30,8 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
     private static final int LIST_SCROLL_UP_Y = LEFT_PANEL_Y + 2;
     private static final int LIST_SCROLL_DOWN_Y = LEFT_PANEL_Y + LEFT_PANEL_HEIGHT - 12;
     private static final int LIST_CONTENT_Y = LEFT_PANEL_Y + 16;
-    private static final int LIST_ROW_HEIGHT = 14;
-    private static final int LIST_MAX_ROWS = 10;
-    private static final int LIST_ARROW_X = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 8;
+    private static final int LIST_ROW_HEIGHT = 16;
+    private static final int LIST_MAX_ROWS = 9;
 
     private int listScrollOffset;
 
@@ -88,7 +87,6 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         int localMouseX = mouseX - this.x;
         int localMouseY = mouseY - this.y;
 
-        context.drawText(this.textRenderer, this.title, 8, 8, 0xFFFFFF, false);
         context.drawText(this.textRenderer, Text.translatable("screen.legittrade.trade_list"), LEFT_PANEL_X + 4, LEFT_PANEL_Y + 2, 0xD0D0D0, false);
 
         drawScrollControls(context, localMouseX, localMouseY);
@@ -96,9 +94,6 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
 
         TradeConfig.TradeEntry trade = handler.getSelectedTrade();
         if (trade != null) {
-            String req = Text.translatable("screen.legittrade.required", trade.inputCount).getString();
-            context.drawText(this.textRenderer, req, RIGHT_PANEL_X + 8, RIGHT_TOP_Y + 6, 0xD0D0D0, false);
-
             String xp = Text.translatable("screen.legittrade.xp_reward", trade.xpReward).getString();
             context.drawText(this.textRenderer, xp, RIGHT_PANEL_X + 8, RIGHT_TOP_Y + 36, 0x55FF55, false);
         } else {
@@ -112,20 +107,36 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         boolean canUp = listScrollOffset > 0;
         boolean canDown = (listScrollOffset + LIST_MAX_ROWS) < handler.getTradeCount();
 
-        int upX = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
-        int downX = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
+        int buttonX = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
+        drawVanillaArrowButton(context, buttonX, LIST_SCROLL_UP_Y, true, canUp, isInScrollUpLocal(localMouseX, localMouseY));
+        drawVanillaArrowButton(context, buttonX, LIST_SCROLL_DOWN_Y, false, canDown, isInScrollDownLocal(localMouseX, localMouseY));
+    }
 
-        int upBg = isInScrollUpLocal(localMouseX, localMouseY) ? 0xFF4E4E4E : 0xFF353535;
-        int downBg = isInScrollDownLocal(localMouseX, localMouseY) ? 0xFF4E4E4E : 0xFF353535;
+    private void drawVanillaArrowButton(DrawContext context, int x, int y, boolean up, boolean enabled, boolean hovered) {
+        int outer = enabled ? 0xFF000000 : 0xFF222222;
+        int fill = enabled ? (hovered ? 0xFF8B8B8B : 0xFF6B6B6B) : 0xFF4A4A4A;
 
-        context.fill(upX, LIST_SCROLL_UP_Y, upX + 10, LIST_SCROLL_UP_Y + 10, upBg);
-        context.fill(downX, LIST_SCROLL_DOWN_Y, downX + 10, LIST_SCROLL_DOWN_Y + 10, downBg);
+        context.fill(x, y, x + 10, y + 10, outer);
+        context.fill(x + 1, y + 1, x + 9, y + 9, fill);
+        context.fill(x + 1, y + 1, x + 9, y + 2, 0xFFFFFFFF);
+        context.fill(x + 1, y + 1, x + 2, y + 9, 0xFFFFFFFF);
+        context.fill(x + 8, y + 1, x + 9, y + 9, 0xFF3A3A3A);
+        context.fill(x + 1, y + 8, x + 9, y + 9, 0xFF3A3A3A);
 
-        int upColor = canUp ? 0xFFFFFF : 0x666666;
-        int downColor = canDown ? 0xFFFFFF : 0x666666;
+        int arrowColor = enabled ? 0xFFFFFFFF : 0xFF7A7A7A;
+        drawArrowGlyph(context, x + 3, y + 3, up, arrowColor);
+    }
 
-        context.drawText(this.textRenderer, "^", LIST_ARROW_X, LIST_SCROLL_UP_Y + 1, upColor, false);
-        context.drawText(this.textRenderer, "v", LIST_ARROW_X, LIST_SCROLL_DOWN_Y + 1, downColor, false);
+    private void drawArrowGlyph(DrawContext context, int x, int y, boolean up, int color) {
+        if (up) {
+            context.fill(x + 2, y, x + 3, y + 1, color);
+            context.fill(x + 1, y + 1, x + 4, y + 2, color);
+            context.fill(x, y + 2, x + 5, y + 3, color);
+        } else {
+            context.fill(x, y, x + 5, y + 1, color);
+            context.fill(x + 1, y + 1, x + 4, y + 2, color);
+            context.fill(x + 2, y + 2, x + 3, y + 3, color);
+        }
     }
 
     private void drawTradeList(DrawContext context, int localMouseX, int localMouseY) {
@@ -155,28 +166,39 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
             ItemStack inputIcon = trade.getInputItem() != null ? new ItemStack(trade.getInputItem()) : ItemStack.EMPTY;
             ItemStack outputIcon = trade.getOutputItem() != null ? new ItemStack(trade.getOutputItem()) : ItemStack.EMPTY;
 
+            int inputIconX = LEFT_PANEL_X + 4;
+            int inputCountX = LEFT_PANEL_X + 22;
+            int arrowX = LEFT_PANEL_X + 36;
+            int outputIconX = LEFT_PANEL_X + 46;
+            int outputCountX = LEFT_PANEL_X + 64;
+
             if (!inputIcon.isEmpty()) {
-                context.drawItem(inputIcon, LEFT_PANEL_X + 4, rowY - 1);
+                context.drawItem(inputIcon, inputIconX, rowY - 1);
             }
-            context.drawText(this.textRenderer, "->", LEFT_PANEL_X + 23, rowY + 2, affordable ? 0xBBBBBB : 0xCC6666, false);
+            context.drawText(this.textRenderer, "->", arrowX, rowY + 2, affordable ? 0xBBBBBB : 0xCC6666, false);
             if (!outputIcon.isEmpty()) {
-                context.drawItem(outputIcon, LEFT_PANEL_X + 34, rowY - 1);
+                context.drawItem(outputIcon, outputIconX, rowY - 1);
             }
 
-            String line = trade.inputCount + "->" + trade.outputCount;
-            String clipped = this.textRenderer.trimToWidth(line, LEFT_PANEL_WIDTH - 72);
             int lineColor = affordable ? 0xFFFFFF : 0xFF8888;
-            context.drawText(this.textRenderer, clipped, LEFT_PANEL_X + 54, rowY + 2, lineColor, false);
+            String inputCount = compactCount(trade.inputCount);
+            String outputCount = compactCount(trade.outputCount);
+            int countY = rowY + 4;
 
-            String xpBadge = "+" + trade.xpReward;
-            int xpColor = trade.xpReward > 0 ? 0x66FF66 : 0x999999;
-            int xpWidth = this.textRenderer.getWidth(xpBadge);
-            context.drawText(this.textRenderer, xpBadge, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 14 - xpWidth, rowY + 2, xpColor, false);
+            context.drawText(this.textRenderer, inputCount, inputCountX, countY, lineColor, true);
+            context.drawText(this.textRenderer, outputCount, outputCountX, countY, lineColor, true);
 
             if (!affordable) {
                 context.fill(LEFT_PANEL_X + 2, rowY + LIST_ROW_HEIGHT - 3, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12, rowY + LIST_ROW_HEIGHT - 2, 0x99AA4444);
             }
         }
+    }
+
+    private String compactCount(int count) {
+        if (count > 99) {
+            return "99+";
+        }
+        return Integer.toString(Math.max(0, count));
     }
 
     private String formatTradeLine(TradeConfig.TradeEntry trade) {

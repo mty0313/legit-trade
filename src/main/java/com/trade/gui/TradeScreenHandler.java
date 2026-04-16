@@ -40,7 +40,7 @@ public class TradeScreenHandler extends ScreenHandler {
         this.inputInventory = new SimpleInventory(1);
         this.context = context;
 
-        this.addSlot(new Slot(inputInventory, INPUT_SLOT, RIGHT_PANEL_X + 20, 16));
+        this.addSlot(new Slot(inputInventory, INPUT_SLOT, RIGHT_PANEL_X + 8, 16));
         this.addSlot(new TradeOutputSlot(this, RIGHT_PANEL_X + 92, 16));
 
         int playerInvY = TOP_PANEL_HEIGHT + 28;
