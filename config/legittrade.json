@@ -1,0 +1,143 @@
+[
+  {
+    "group": "建材",
+    "trades": [
+      {
+        "input": "minecraft:dirt",
+        "output": "minecraft:stone",
+        "inputCount": 1,
+        "outputCount": 64,
+        "xpReward": 500
+      },
+      {
+        "input": "minecraft:cobblestone",
+        "output": "minecraft:oak_log",
+        "inputCount": 1,
+        "outputCount": 32,
+        "xpReward": 400
+      },
+      {
+        "input": "minecraft:oak_planks",
+        "output": "minecraft:glass",
+        "inputCount": 1,
+        "outputCount": 32,
+        "xpReward": 450
+      },
+      {
+        "input": "minecraft:sand",
+        "output": "minecraft:quartz_block",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 600
+      },
+      {
+        "input": "minecraft:gravel",
+        "output": "minecraft:bricks",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 550
+      },
+      {
+        "input": "minecraft:clay_ball",
+        "output": "minecraft:glowstone",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 700
+      }
+    ]
+  },
+  {
+    "group": "资源",
+    "trades": [
+      {
+        "input": "minecraft:coal",
+        "output": "minecraft:iron_ingot",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 600
+      },
+      {
+        "input": "minecraft:iron_nugget",
+        "output": "minecraft:gold_ingot",
+        "inputCount": 1,
+        "outputCount": 8,
+        "xpReward": 800
+      },
+      {
+        "input": "minecraft:copper_ingot",
+        "output": "minecraft:emerald",
+        "inputCount": 1,
+        "outputCount": 8,
+        "xpReward": 900
+      },
+      {
+        "input": "minecraft:redstone",
+        "output": "minecraft:diamond",
+        "inputCount": 1,
+        "outputCount": 4,
+        "xpReward": 1200
+      },
+      {
+        "input": "minecraft:lapis_lazuli",
+        "output": "minecraft:netherite_scrap",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 2000
+      },
+      {
+        "input": "minecraft:amethyst_shard",
+        "output": "minecraft:ender_pearl",
+        "inputCount": 1,
+        "outputCount": 8,
+        "xpReward": 1000
+      }
+    ]
+  },
+  {
+    "group": "食物与工具",
+    "trades": [
+      {
+        "input": "minecraft:wheat",
+        "output": "minecraft:golden_apple",
+        "inputCount": 1,
+        "outputCount": 8,
+        "xpReward": 900
+      },
+      {
+        "input": "minecraft:potato",
+        "output": "minecraft:cooked_beef",
+        "inputCount": 1,
+        "outputCount": 32,
+        "xpReward": 500
+      },
+      {
+        "input": "minecraft:carrot",
+        "output": "minecraft:enchanted_golden_apple",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 2500
+      },
+      {
+        "input": "minecraft:stick",
+        "output": "minecraft:diamond_pickaxe",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 1800
+      },
+      {
+        "input": "minecraft:string",
+        "output": "minecraft:elytra",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 3000
+      },
+      {
+        "input": "minecraft:paper",
+        "output": "minecraft:totem_of_undying",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 3500
+      }
+    ]
+  }
+]

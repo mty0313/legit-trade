@@ -1,7 +1,6 @@
 package com.trade;
 
 import com.trade.gui.TradeScreen;
-import com.trade.gui.TradeScreenHandler;
 import com.trade.network.ConfigSyncPacket;
 import com.trade.network.TradePackets;
 import net.fabricmc.api.ClientModInitializer;
@@ -14,8 +13,8 @@ public class LegitTradeClient implements ClientModInitializer {
         HandledScreens.register(TradePackets.TRADE_SCREEN_HANDLER, TradeScreen::new);
 
         ClientPlayNetworking.registerGlobalReceiver(ConfigSyncPacket.ID, (client, handler, buf, responseSender) -> {
-            var trades = ConfigSyncPacket.read(buf);
-            client.execute(() -> TradeConfig.setTrades(trades));
+            var groups = ConfigSyncPacket.read(buf);
+            client.execute(() -> TradeConfig.setTradeGroups(groups));
         });
     }
 }

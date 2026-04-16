@@ -1,0 +1,12 @@
+{
+  "screen.legittrade.trade": "交易",
+  "screen.legittrade.trade_list": "交易列表",
+  "screen.legittrade.required": "需要: %s",
+  "screen.legittrade.xp_reward": "经验: +%s",
+  "screen.legittrade.no_trade_selected": "请选择交易",
+  "screen.legittrade.no_trades": "暂无交易",
+  "command.legittrade.reload.success": "交易配置已重载",
+  "tooltip.legittrade.trade_preview": "→ %sx %s (+%s 经验)",
+  "block.legittrade.trade_block": "交易方块",
+  "item.legittrade.trade_block": "交易方块"
+}

@@ -22,7 +22,9 @@ public class TradeScreenHandler extends ScreenHandler {
     private static final int PLAYER_INV_END = 38;
 
     private static final int RIGHT_PANEL_X = 96;
-    private static final int TOP_PANEL_HEIGHT = 48;
+    private static final int BG_HEIGHT = 186;
+    private static final int HOTBAR_Y = BG_HEIGHT - 36;
+    private static final int PLAYER_INV_Y = HOTBAR_Y - 58;
 
     public static final int SELECT_TRADE_BASE_BUTTON_ID = 1000;
 
@@ -43,16 +45,14 @@ public class TradeScreenHandler extends ScreenHandler {
         this.addSlot(new Slot(inputInventory, INPUT_SLOT, RIGHT_PANEL_X + 8, 16));
         this.addSlot(new TradeOutputSlot(this, RIGHT_PANEL_X + 92, 16));
 
-        int playerInvY = TOP_PANEL_HEIGHT + 28;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, RIGHT_PANEL_X + 8 + col * 18, playerInvY + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, RIGHT_PANEL_X + 8 + col * 18, PLAYER_INV_Y + row * 18));
             }
         }
 
-        int hotbarY = playerInvY + 58;
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(playerInventory, col, RIGHT_PANEL_X + 8 + col * 18, hotbarY));
+            this.addSlot(new Slot(playerInventory, col, RIGHT_PANEL_X + 8 + col * 18, HOTBAR_Y));
         }
     }
 

@@ -6,5 +6,7 @@
   "screen.legittrade.no_trade_selected": "Select a trade",
   "screen.legittrade.no_trades": "No trades",
   "command.legittrade.reload.success": "Trade config reloaded",
-  "tooltip.legittrade.trade_preview": "→ %sx %s (+%s XP)"
+  "tooltip.legittrade.trade_preview": "→ %sx %s (+%s XP)",
+  "block.legittrade.trade_block": "Trade Block",
+  "item.legittrade.trade_block": "Trade Block"
 }

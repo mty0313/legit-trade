@@ -2,6 +2,9 @@ package com.trade;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -13,19 +16,47 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TradeConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
 	private static final int MAX_STACK_COUNT = 64;
+	private static volatile List<TradeGroup> tradeGroups = Collections.emptyList();
 	private static volatile List<TradeEntry> trades = Collections.emptyList();
+
+	public static List<TradeGroup> getTradeGroups() {
+		return tradeGroups;
+	}
 
 	public static List<TradeEntry> getTrades() {
 		return trades;
 	}
 
+	public static void setTradeGroups(List<TradeGroup> newGroups) {
+		List<TradeGroup> safeGroups = freezeGroups(newGroups);
+		tradeGroups = Collections.unmodifiableList(safeGroups);
+
+		List<TradeEntry> flattened = new ArrayList<>();
+		for (TradeGroup group : safeGroups) {
+			flattened.addAll(group.trades);
+		}
+		trades = Collections.unmodifiableList(flattened);
+	}
+
 	public static void setTrades(List<TradeEntry> newTrades) {
-		trades = Collections.unmodifiableList(newTrades != null ? newTrades : Collections.emptyList());
+		setTradeGroups(List.of(new TradeGroup("Default", newTrades)));
+	}
+
+	public static final class TradeGroup {
+		public final String group;
+		public final List<TradeEntry> trades;
+
+		public TradeGroup(String group, List<TradeEntry> trades) {
+			this.group = (group == null || group.isBlank()) ? "Default" : group;
+			this.trades = Collections.unmodifiableList(new ArrayList<>(trades != null ? trades : Collections.emptyList()));
+		}
 	}
 
 	public static final class TradeEntry {
@@ -45,21 +76,24 @@ public class TradeConfig {
 
 		public Item getInputItem() {
 			Identifier id = Identifier.tryParse(input);
-			return id != null ? Registries.ITEM.get(id) : null;
+			if (id == null || !Registries.ITEM.containsId(id)) {
+				return null;
+			}
+			return Registries.ITEM.get(id);
 		}
 
 		public Item getOutputItem() {
 			Identifier id = Identifier.tryParse(output);
-			return id != null ? Registries.ITEM.get(id) : null;
+			if (id == null || !Registries.ITEM.containsId(id)) {
+				return null;
+			}
+			return Registries.ITEM.get(id);
 		}
 
 		public boolean isValid() {
 			Identifier inputId = Identifier.tryParse(input);
 			Identifier outputId = Identifier.tryParse(output);
 			if (inputId == null || outputId == null) {
-				return false;
-			}
-			if (!Registries.ITEM.containsId(inputId) || !Registries.ITEM.containsId(outputId)) {
 				return false;
 			}
 			return inputCount >= 1 && inputCount <= MAX_STACK_COUNT
@@ -75,7 +109,76 @@ public class TradeConfig {
 		return Math.min(count, MAX_STACK_COUNT);
 	}
 
-	// Gson deserialization target - uses mutable fields
+	private static List<TradeGroup> freezeGroups(List<TradeGroup> groups) {
+		if (groups == null || groups.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<TradeGroup> safe = new ArrayList<>(groups.size());
+		for (TradeGroup group : groups) {
+			if (group == null || group.trades.isEmpty()) {
+				continue;
+			}
+			safe.add(new TradeGroup(group.group, group.trades));
+		}
+		return safe;
+	}
+
+	private static List<TradeGroup> toSingleDefaultGroup(List<TradeEntry> entries) {
+		if (entries.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return List.of(new TradeGroup("Default", entries));
+	}
+
+	private static List<TradeGroup> toValidGroups(List<RawTradeGroup> rawGroups) {
+		List<TradeGroup> groups = new ArrayList<>();
+		if (rawGroups == null) {
+			return groups;
+		}
+
+		for (RawTradeGroup rawGroup : rawGroups) {
+			if (rawGroup == null) {
+				continue;
+			}
+			String groupName = (rawGroup.group == null || rawGroup.group.isBlank()) ? "Default" : rawGroup.group;
+			List<TradeEntry> validTrades = toValidTrades(rawGroup.trades, groupName);
+			if (!validTrades.isEmpty()) {
+				groups.add(new TradeGroup(groupName, validTrades));
+			}
+		}
+		return groups;
+	}
+
+	private static List<TradeEntry> toValidTrades(List<RawTradeEntry> rawList, String groupName) {
+		List<TradeEntry> validTrades = new ArrayList<>();
+		if (rawList == null) {
+			return validTrades;
+		}
+
+		Set<String> seen = new HashSet<>();
+		for (RawTradeEntry raw : rawList) {
+			if (raw == null) {
+				continue;
+			}
+			TradeEntry entry = raw.toTradeEntry();
+			if (!entry.isValid()) {
+				LOGGER.warn("Invalid trade entry in group '{}': {} -> {} (count: {}/{}, xp: {})",
+					groupName, raw.input, raw.output, raw.inputCount, raw.outputCount, raw.xpReward);
+				continue;
+			}
+
+			String key = entry.input + "|" + entry.output + "|" + entry.inputCount + "|" + entry.outputCount + "|" + entry.xpReward;
+			if (!seen.add(key)) {
+				LOGGER.warn("Duplicate trade entry ignored in group '{}': {} -> {} (count: {}/{}, xp: {})",
+					groupName, entry.input, entry.output, entry.inputCount, entry.outputCount, entry.xpReward);
+				continue;
+			}
+
+			validTrades.add(entry);
+		}
+		return validTrades;
+	}
+
 	private static final class RawTradeEntry {
 		String input;
 		String output;
@@ -88,6 +191,11 @@ public class TradeConfig {
 		}
 	}
 
+	private static final class RawTradeGroup {
+		String group = "Default";
+		List<RawTradeEntry> trades = Collections.emptyList();
+	}
+
 	public static void load() {
 		Path configPath = Path.of("config/legittrade.json");
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -95,44 +203,46 @@ public class TradeConfig {
 		try {
 			if (!Files.exists(configPath)) {
 				Files.createDirectories(configPath.getParent());
-				List<TradeEntry> defaults = getDefaultTrades();
+				List<TradeGroup> defaults = getDefaultTradeGroups();
 				Files.writeString(configPath, gson.toJson(defaults));
-				trades = Collections.unmodifiableList(defaults);
+				setTradeGroups(defaults);
 				return;
 			}
 
 			String json = Files.readString(configPath);
-			List<RawTradeEntry> rawList = gson.fromJson(json, new TypeToken<List<RawTradeEntry>>(){}.getType());
+			JsonElement root = gson.fromJson(json, JsonElement.class);
 
-			List<TradeEntry> validTrades = new ArrayList<>();
-			if (rawList != null) {
-				for (RawTradeEntry raw : rawList) {
-					TradeEntry entry = raw.toTradeEntry();
-					if (entry.isValid()) {
-						validTrades.add(entry);
+			List<TradeGroup> validGroups = Collections.emptyList();
+			if (root != null && root.isJsonArray()) {
+				JsonArray array = root.getAsJsonArray();
+				if (!array.isEmpty() && array.get(0).isJsonObject()) {
+					JsonObject first = array.get(0).getAsJsonObject();
+					if (first.has("group") || first.has("trades")) {
+						List<RawTradeGroup> rawGroups = gson.fromJson(array, new TypeToken<List<RawTradeGroup>>() {}.getType());
+						validGroups = toValidGroups(rawGroups);
 					} else {
-						LOGGER.warn("Invalid trade entry: {} -> {} (count: {}/{}, xp: {})",
-							raw.input, raw.output, raw.inputCount, raw.outputCount, raw.xpReward);
+						List<RawTradeEntry> rawList = gson.fromJson(array, new TypeToken<List<RawTradeEntry>>() {}.getType());
+						validGroups = toSingleDefaultGroup(toValidTrades(rawList, "Default"));
 					}
 				}
 			}
 
-			if (validTrades.isEmpty()) {
-				LOGGER.warn("No valid trades loaded, using defaults");
-				trades = Collections.unmodifiableList(getDefaultTrades());
+			if (validGroups.isEmpty()) {
+				LOGGER.warn("No valid trade groups loaded, using defaults");
+				setTradeGroups(getDefaultTradeGroups());
 			} else {
-				trades = Collections.unmodifiableList(validTrades);
-				LOGGER.info("Loaded {} valid trades", validTrades.size());
+				setTradeGroups(validGroups);
+				LOGGER.info("Loaded {} trade groups and {} trades", getTradeGroups().size(), getTrades().size());
 			}
 		} catch (Exception e) {
 			LOGGER.error("Failed to load trade config", e);
-			trades = Collections.unmodifiableList(getDefaultTrades());
+			setTradeGroups(getDefaultTradeGroups());
 		}
 	}
 
-	private static List<TradeEntry> getDefaultTrades() {
-		List<TradeEntry> defaults = new ArrayList<>();
-		defaults.add(new TradeEntry("minecraft:dirt", "minecraft:diamond", 64, 1, 100));
-		return defaults;
+	private static List<TradeGroup> getDefaultTradeGroups() {
+		List<TradeEntry> buildingTrades = new ArrayList<>();
+		buildingTrades.add(new TradeEntry("minecraft:dirt", "minecraft:diamond", 64, 1, 100));
+		return List.of(new TradeGroup("Building", buildingTrades));
 	}
 }

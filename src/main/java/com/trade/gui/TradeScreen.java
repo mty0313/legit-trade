@@ -27,13 +27,16 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
     private static final int RIGHT_BOTTOM_Y = RIGHT_TOP_Y + RIGHT_TOP_HEIGHT + 4;
     private static final int RIGHT_BOTTOM_HEIGHT = BG_HEIGHT - RIGHT_BOTTOM_Y - 6;
 
-    private static final int LIST_SCROLL_UP_Y = LEFT_PANEL_Y + 2;
-    private static final int LIST_SCROLL_DOWN_Y = LEFT_PANEL_Y + LEFT_PANEL_HEIGHT - 12;
-    private static final int LIST_CONTENT_Y = LEFT_PANEL_Y + 16;
+    private static final int GROUP_BUTTON_Y = LEFT_PANEL_Y + 2;
+    private static final int GROUP_PREV_X = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 24;
+    private static final int GROUP_NEXT_X = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
+
+    private static final int LIST_CONTENT_Y = LEFT_PANEL_Y + 14;
     private static final int LIST_ROW_HEIGHT = 16;
-    private static final int LIST_MAX_ROWS = 9;
+    private static final int LIST_MAX_ROWS = 10;
 
     private int listScrollOffset;
+    private int currentGroupIndex;
 
     public TradeScreen(TradeScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -42,8 +45,49 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         this.playerInventoryTitleY = 0;
     }
 
+    private void clampGroupIndex() {
+        int max = Math.max(0, TradeConfig.getTradeGroups().size() - 1);
+        if (currentGroupIndex < 0) {
+            currentGroupIndex = 0;
+        } else if (currentGroupIndex > max) {
+            currentGroupIndex = max;
+        }
+    }
+
+    private List<TradeConfig.TradeEntry> getCurrentGroupTrades() {
+        List<TradeConfig.TradeGroup> groups = TradeConfig.getTradeGroups();
+        if (groups.isEmpty()) {
+            return List.of();
+        }
+        clampGroupIndex();
+        return groups.get(currentGroupIndex).trades;
+    }
+
+    private int getCurrentGroupStartOffset() {
+        List<TradeConfig.TradeGroup> groups = TradeConfig.getTradeGroups();
+        if (groups.isEmpty()) {
+            return 0;
+        }
+        clampGroupIndex();
+
+        int offset = 0;
+        for (int i = 0; i < currentGroupIndex; i++) {
+            offset += groups.get(i).trades.size();
+        }
+        return offset;
+    }
+
+    private String getCurrentGroupName() {
+        List<TradeConfig.TradeGroup> groups = TradeConfig.getTradeGroups();
+        if (groups.isEmpty()) {
+            return "";
+        }
+        clampGroupIndex();
+        return groups.get(currentGroupIndex).group;
+    }
+
     private void clampScrollOffset() {
-        int maxOffset = Math.max(0, handler.getTradeCount() - LIST_MAX_ROWS);
+        int maxOffset = Math.max(0, getCurrentGroupTrades().size() - LIST_MAX_ROWS);
         if (listScrollOffset < 0) {
             listScrollOffset = 0;
         } else if (listScrollOffset > maxOffset) {
@@ -82,14 +126,18 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
 
     @Override
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+        clampGroupIndex();
         clampScrollOffset();
 
         int localMouseX = mouseX - this.x;
         int localMouseY = mouseY - this.y;
 
-        context.drawText(this.textRenderer, Text.translatable("screen.legittrade.trade_list"), LEFT_PANEL_X + 4, LEFT_PANEL_Y + 2, 0xD0D0D0, false);
+        String groupName = this.textRenderer.trimToWidth(getCurrentGroupName(), LEFT_PANEL_WIDTH - 30);
+        if (!groupName.isEmpty()) {
+            context.drawText(this.textRenderer, groupName, LEFT_PANEL_X + 4, LEFT_PANEL_Y + 2, 0xD0D0D0, false);
+        }
 
-        drawScrollControls(context, localMouseX, localMouseY);
+        drawGroupControls(context, localMouseX, localMouseY);
         drawTradeList(context, localMouseX, localMouseY);
 
         TradeConfig.TradeEntry trade = handler.getSelectedTrade();
@@ -100,19 +148,19 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
             context.drawText(this.textRenderer, Text.translatable("screen.legittrade.no_trade_selected"), RIGHT_PANEL_X + 8, RIGHT_TOP_Y + 20, 0xAAAAAA, false);
         }
 
-        context.drawText(this.textRenderer, this.playerInventoryTitle, RIGHT_PANEL_X + 8, RIGHT_BOTTOM_Y + 6, 0xFFFFFF, false);
+        context.drawText(this.textRenderer, this.playerInventoryTitle, RIGHT_PANEL_X + 8, RIGHT_BOTTOM_Y + 24, 0xFFFFFF, false);
     }
 
-    private void drawScrollControls(DrawContext context, int localMouseX, int localMouseY) {
-        boolean canUp = listScrollOffset > 0;
-        boolean canDown = (listScrollOffset + LIST_MAX_ROWS) < handler.getTradeCount();
+    private void drawGroupControls(DrawContext context, int localMouseX, int localMouseY) {
+        int groupCount = TradeConfig.getTradeGroups().size();
+        boolean canPrev = groupCount > 0 && currentGroupIndex > 0;
+        boolean canNext = groupCount > 0 && currentGroupIndex < groupCount - 1;
 
-        int buttonX = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
-        drawVanillaArrowButton(context, buttonX, LIST_SCROLL_UP_Y, true, canUp, isInScrollUpLocal(localMouseX, localMouseY));
-        drawVanillaArrowButton(context, buttonX, LIST_SCROLL_DOWN_Y, false, canDown, isInScrollDownLocal(localMouseX, localMouseY));
+        drawNavButton(context, GROUP_PREV_X, GROUP_BUTTON_Y, false, canPrev, isInPrevGroupLocal(localMouseX, localMouseY));
+        drawNavButton(context, GROUP_NEXT_X, GROUP_BUTTON_Y, true, canNext, isInNextGroupLocal(localMouseX, localMouseY));
     }
 
-    private void drawVanillaArrowButton(DrawContext context, int x, int y, boolean up, boolean enabled, boolean hovered) {
+    private void drawNavButton(DrawContext context, int x, int y, boolean right, boolean enabled, boolean hovered) {
         int outer = enabled ? 0xFF000000 : 0xFF222222;
         int fill = enabled ? (hovered ? 0xFF8B8B8B : 0xFF6B6B6B) : 0xFF4A4A4A;
 
@@ -124,45 +172,48 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         context.fill(x + 1, y + 8, x + 9, y + 9, 0xFF3A3A3A);
 
         int arrowColor = enabled ? 0xFFFFFFFF : 0xFF7A7A7A;
-        drawArrowGlyph(context, x + 3, y + 3, up, arrowColor);
+        drawHorizontalArrowGlyph(context, x + 3, y + 3, right, arrowColor);
     }
 
-    private void drawArrowGlyph(DrawContext context, int x, int y, boolean up, int color) {
-        if (up) {
-            context.fill(x + 2, y, x + 3, y + 1, color);
-            context.fill(x + 1, y + 1, x + 4, y + 2, color);
-            context.fill(x, y + 2, x + 5, y + 3, color);
-        } else {
-            context.fill(x, y, x + 5, y + 1, color);
-            context.fill(x + 1, y + 1, x + 4, y + 2, color);
+    private void drawHorizontalArrowGlyph(DrawContext context, int x, int y, boolean right, int color) {
+        if (right) {
+            context.fill(x, y, x + 1, y + 5, color);
+            context.fill(x + 1, y + 1, x + 2, y + 4, color);
             context.fill(x + 2, y + 2, x + 3, y + 3, color);
+        } else {
+            context.fill(x + 2, y, x + 3, y + 5, color);
+            context.fill(x + 1, y + 1, x + 2, y + 4, color);
+            context.fill(x, y + 2, x + 1, y + 3, color);
         }
     }
 
     private void drawTradeList(DrawContext context, int localMouseX, int localMouseY) {
-        List<TradeConfig.TradeEntry> trades = TradeConfig.getTrades();
-        if (trades.isEmpty()) {
+        List<TradeConfig.TradeEntry> groupTrades = getCurrentGroupTrades();
+        if (groupTrades.isEmpty()) {
             context.drawText(this.textRenderer, Text.translatable("screen.legittrade.no_trades"), LEFT_PANEL_X + 4, LIST_CONTENT_Y, 0x999999, false);
             return;
         }
 
         int hovered = getHoveredTradeIndex(localMouseX, localMouseY);
         int selected = handler.getSelectedTradeIndex();
-        int end = Math.min(trades.size(), listScrollOffset + LIST_MAX_ROWS);
+        int groupStart = getCurrentGroupStartOffset();
+
+        int end = Math.min(groupTrades.size(), listScrollOffset + LIST_MAX_ROWS);
         for (int i = listScrollOffset; i < end; i++) {
             int row = i - listScrollOffset;
             int rowY = LIST_CONTENT_Y + row * LIST_ROW_HEIGHT;
+            int globalIndex = groupStart + i;
 
             int color = 0xFF2A2A2A;
-            if (i == selected) {
+            if (globalIndex == selected) {
                 color = 0xFF335577;
-            } else if (i == hovered) {
+            } else if (globalIndex == hovered) {
                 color = 0xFF3A3A3A;
             }
-            context.fill(LEFT_PANEL_X + 2, rowY - 1, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12, rowY + LIST_ROW_HEIGHT - 2, color);
+            context.fill(LEFT_PANEL_X + 2, rowY - 1, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 2, rowY + LIST_ROW_HEIGHT - 2, color);
 
-            TradeConfig.TradeEntry trade = trades.get(i);
-            boolean affordable = handler.canAffordTradeAt(i);
+            TradeConfig.TradeEntry trade = groupTrades.get(i);
+            boolean affordable = handler.canAffordTradeAt(globalIndex);
             ItemStack inputIcon = trade.getInputItem() != null ? new ItemStack(trade.getInputItem()) : ItemStack.EMPTY;
             ItemStack outputIcon = trade.getOutputItem() != null ? new ItemStack(trade.getOutputItem()) : ItemStack.EMPTY;
 
@@ -189,7 +240,7 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
             context.drawText(this.textRenderer, outputCount, outputCountX, countY, lineColor, true);
 
             if (!affordable) {
-                context.fill(LEFT_PANEL_X + 2, rowY + LIST_ROW_HEIGHT - 3, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12, rowY + LIST_ROW_HEIGHT - 2, 0x99AA4444);
+                context.fill(LEFT_PANEL_X + 2, rowY + LIST_ROW_HEIGHT - 3, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 2, rowY + LIST_ROW_HEIGHT - 2, 0x99AA4444);
             }
         }
     }
@@ -229,7 +280,7 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         int localMouseY = y - this.y;
 
         int hoveredTradeIndex = getHoveredTradeIndex(localMouseX, localMouseY);
-        if (hoveredTradeIndex >= 0 && hoveredTradeIndex < handler.getTradeCount()) {
+        if (hoveredTradeIndex >= 0 && hoveredTradeIndex < TradeConfig.getTrades().size()) {
             TradeConfig.TradeEntry trade = TradeConfig.getTrades().get(hoveredTradeIndex);
             context.drawTooltip(this.textRenderer, Text.literal(formatTradeLine(trade)), x, y);
             return;
@@ -266,15 +317,20 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && this.client != null && this.client.interactionManager != null && this.client.player != null) {
+            int localMouseX = (int) mouseX - this.x;
+            int localMouseY = (int) mouseY - this.y;
+
             if (isInLeftPanel(mouseX, mouseY)) {
-                if (isInScrollUp(mouseX, mouseY)) {
-                    listScrollOffset--;
-                    clampScrollOffset();
+                if (isInPrevGroupLocal(localMouseX, localMouseY)) {
+                    currentGroupIndex--;
+                    clampGroupIndex();
+                    listScrollOffset = 0;
                     return true;
                 }
-                if (isInScrollDown(mouseX, mouseY)) {
-                    listScrollOffset++;
-                    clampScrollOffset();
+                if (isInNextGroupLocal(localMouseX, localMouseY)) {
+                    currentGroupIndex++;
+                    clampGroupIndex();
+                    listScrollOffset = 0;
                     return true;
                 }
 
@@ -295,13 +351,24 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         if (localY < LIST_CONTENT_Y || localY >= LIST_CONTENT_Y + LIST_MAX_ROWS * LIST_ROW_HEIGHT) {
             return -1;
         }
+
+        List<TradeConfig.TradeEntry> groupTrades = getCurrentGroupTrades();
+        if (groupTrades.isEmpty()) {
+            return -1;
+        }
+
         int row = (localY - LIST_CONTENT_Y) / LIST_ROW_HEIGHT;
-        return listScrollOffset + row;
+        int indexInGroup = listScrollOffset + row;
+        if (indexInGroup < 0 || indexInGroup >= groupTrades.size()) {
+            return -1;
+        }
+
+        return getCurrentGroupStartOffset() + indexInGroup;
     }
 
     private int getHoveredTradeIndex(int localMouseX, int localMouseY) {
         int left = LEFT_PANEL_X + 2;
-        int right = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
+        int right = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 2;
         if (localMouseX < left || localMouseX >= right) {
             return -1;
         }
@@ -309,9 +376,14 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
             return -1;
         }
 
+        List<TradeConfig.TradeEntry> groupTrades = getCurrentGroupTrades();
         int row = (localMouseY - LIST_CONTENT_Y) / LIST_ROW_HEIGHT;
-        int index = listScrollOffset + row;
-        return index < handler.getTradeCount() ? index : -1;
+        int indexInGroup = listScrollOffset + row;
+        if (indexInGroup < 0 || indexInGroup >= groupTrades.size()) {
+            return -1;
+        }
+
+        return getCurrentGroupStartOffset() + indexInGroup;
     }
 
     private boolean isInLeftPanel(double mouseX, double mouseY) {
@@ -320,23 +392,13 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         return mouseX >= lx && mouseX < lx + LEFT_PANEL_WIDTH && mouseY >= ly && mouseY < ly + LEFT_PANEL_HEIGHT;
     }
 
-    private boolean isInScrollUp(double mouseX, double mouseY) {
-        return isInScrollUpLocal((int) mouseX - this.x, (int) mouseY - this.y);
+    private boolean isInPrevGroupLocal(int localMouseX, int localMouseY) {
+        return localMouseX >= GROUP_PREV_X && localMouseX < GROUP_PREV_X + 10
+            && localMouseY >= GROUP_BUTTON_Y && localMouseY < GROUP_BUTTON_Y + 10;
     }
 
-    private boolean isInScrollDown(double mouseX, double mouseY) {
-        return isInScrollDownLocal((int) mouseX - this.x, (int) mouseY - this.y);
-    }
-
-    private boolean isInScrollUpLocal(int localMouseX, int localMouseY) {
-        int sx = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
-        int sy = LIST_SCROLL_UP_Y;
-        return localMouseX >= sx && localMouseX < sx + 10 && localMouseY >= sy && localMouseY < sy + 10;
-    }
-
-    private boolean isInScrollDownLocal(int localMouseX, int localMouseY) {
-        int sx = LEFT_PANEL_X + LEFT_PANEL_WIDTH - 12;
-        int sy = LIST_SCROLL_DOWN_Y;
-        return localMouseX >= sx && localMouseX < sx + 10 && localMouseY >= sy && localMouseY < sy + 10;
+    private boolean isInNextGroupLocal(int localMouseX, int localMouseY) {
+        return localMouseX >= GROUP_NEXT_X && localMouseX < GROUP_NEXT_X + 10
+            && localMouseY >= GROUP_BUTTON_Y && localMouseY < GROUP_BUTTON_Y + 10;
     }
 }
