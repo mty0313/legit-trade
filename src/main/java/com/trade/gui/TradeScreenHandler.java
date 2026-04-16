@@ -5,6 +5,7 @@ import com.trade.TradeConfig;
 import com.trade.network.TradePackets;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,7 @@ public class TradeScreenHandler extends ScreenHandler {
     public static final int SELECT_TRADE_BASE_BUTTON_ID = 1000;
 
     private final SimpleInventory inputInventory;
+    private final SimpleInventory outputInventory;
     private final ScreenHandlerContext context;
     private int selectedTradeIndex;
     private int lastXpReward;
@@ -40,6 +42,7 @@ public class TradeScreenHandler extends ScreenHandler {
     public TradeScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(TradePackets.TRADE_SCREEN_HANDLER, syncId);
         this.inputInventory = new SimpleInventory(1);
+        this.outputInventory = new SimpleInventory(1);
         this.context = context;
 
         this.addSlot(new Slot(inputInventory, INPUT_SLOT, RIGHT_PANEL_X + 8, 16));
@@ -54,6 +57,8 @@ public class TradeScreenHandler extends ScreenHandler {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventory, col, RIGHT_PANEL_X + 8 + col * 18, HOTBAR_Y));
         }
+
+        refreshOutputPreview();
     }
 
     private List<TradeConfig.TradeEntry> getTrades() {
@@ -147,27 +152,35 @@ public class TradeScreenHandler extends ScreenHandler {
         return input.getCount() >= trade.inputCount;
     }
 
+    private void refreshOutputPreview() {
+        context.run((world, pos) -> {
+            if (world.isClient) {
+                return;
+            }
+
+            ItemStack preview = ItemStack.EMPTY;
+            TradeConfig.TradeEntry trade = getSelectedTrade();
+            if (canExecuteTrade(trade)) {
+                Item outputItem = trade.getOutputItem();
+                if (outputItem != null) {
+                    int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
+                    if (safeOutputCount > 0) {
+                        preview = new ItemStack(outputItem, safeOutputCount);
+                    }
+                }
+            }
+
+            outputInventory.setStack(0, preview);
+            outputInventory.markDirty();
+        });
+    }
+
     public ItemStack getOutputPreview() {
-        TradeConfig.TradeEntry trade = getSelectedTrade();
-        if (!canExecuteTrade(trade)) {
-            return ItemStack.EMPTY;
-        }
-
-        Item outputItem = trade.getOutputItem();
-        if (outputItem == null) {
-            return ItemStack.EMPTY;
-        }
-
-        int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
-        if (safeOutputCount <= 0) {
-            return ItemStack.EMPTY;
-        }
-
-        return new ItemStack(outputItem, safeOutputCount);
+        return outputInventory.getStack(0);
     }
 
     public boolean hasValidTrade() {
-        return !getOutputPreview().isEmpty();
+        return !outputInventory.getStack(0).isEmpty();
     }
 
     private void returnInputToPlayer(PlayerEntity player, ItemStack stack) {
@@ -248,16 +261,19 @@ public class TradeScreenHandler extends ScreenHandler {
 
         TradeConfig.TradeEntry trade = getSelectedTrade();
         if (!canExecuteTrade(trade)) {
+            refreshOutputPreview();
             return ItemStack.EMPTY;
         }
 
         Item outputItem = trade.getOutputItem();
         if (outputItem == null) {
+            refreshOutputPreview();
             return ItemStack.EMPTY;
         }
 
         int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
         if (safeOutputCount <= 0) {
+            refreshOutputPreview();
             return ItemStack.EMPTY;
         }
 
@@ -269,8 +285,10 @@ public class TradeScreenHandler extends ScreenHandler {
         inputInventory.markDirty();
 
         lastXpReward = trade.xpReward;
+        ItemStack result = new ItemStack(outputItem, safeOutputCount);
+        refreshOutputPreview();
         sendContentUpdates();
-        return new ItemStack(outputItem, safeOutputCount);
+        return result;
     }
 
     @Override
@@ -285,6 +303,7 @@ public class TradeScreenHandler extends ScreenHandler {
             selectedTradeIndex = index;
             if (!player.getWorld().isClient) {
                 autoFillSelectedTrade(player);
+                refreshOutputPreview();
             }
             sendContentUpdates();
             return true;
@@ -328,6 +347,13 @@ public class TradeScreenHandler extends ScreenHandler {
     }
 
     @Override
+    public void onContentChanged(Inventory inventory) {
+        super.onContentChanged(inventory);
+        refreshOutputPreview();
+        sendContentUpdates();
+    }
+
+    @Override
     public boolean canUse(PlayerEntity player) {
         return ScreenHandler.canUse(this.context, player, TradeBlocks.TRADE_BLOCK);
     }
@@ -336,13 +362,14 @@ public class TradeScreenHandler extends ScreenHandler {
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
         dropInventory(player, inputInventory);
+        outputInventory.clear();
     }
 
     private static class TradeOutputSlot extends Slot {
         private final TradeScreenHandler handler;
 
         public TradeOutputSlot(TradeScreenHandler handler, int x, int y) {
-            super(new SimpleInventory(1), 0, x, y);
+            super(handler.outputInventory, 0, x, y);
             this.handler = handler;
         }
 
@@ -358,11 +385,12 @@ public class TradeScreenHandler extends ScreenHandler {
 
         @Override
         public ItemStack getStack() {
-            return handler.getOutputPreview();
+            return super.getStack();
         }
 
         @Override
         public void setStack(ItemStack stack) {
+            super.setStack(stack);
         }
 
         @Override
