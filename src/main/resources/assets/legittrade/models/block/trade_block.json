@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "legittrade:block/trade_block"
+    "down": "legittrade:block/trade_block_side",
+    "up": "legittrade:block/trade_block_side",
+    "north": "legittrade:block/trade_block_front",
+    "south": "legittrade:block/trade_block_side",
+    "west": "legittrade:block/trade_block_side",
+    "east": "legittrade:block/trade_block_side",
+    "particle": "legittrade:block/trade_block_side"
   }
 }

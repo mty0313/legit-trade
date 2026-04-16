@@ -1,0 +1,10 @@
+{
+  "screen.legittrade.trade": "Trade",
+  "screen.legittrade.trade_list": "Trades",
+  "screen.legittrade.required": "Required: %s",
+  "screen.legittrade.xp_reward": "XP: +%s",
+  "screen.legittrade.no_trade_selected": "Select a trade",
+  "screen.legittrade.no_trades": "No trades",
+  "command.legittrade.reload.success": "Trade config reloaded",
+  "tooltip.legittrade.trade_preview": "→ %sx %s (+%s XP)"
+}

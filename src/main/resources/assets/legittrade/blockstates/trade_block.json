@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "legittrade:block/trade_block" },
+    "facing=east": { "model": "legittrade:block/trade_block", "y": 90 },
+    "facing=south": { "model": "legittrade:block/trade_block", "y": 180 },
+    "facing=west": { "model": "legittrade:block/trade_block", "y": 270 }
+  }
+}

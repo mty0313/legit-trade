@@ -1,74 +1,303 @@
 package com.trade.gui;
 
+import com.trade.TradeBlocks;
 import com.trade.TradeConfig;
 import com.trade.network.TradePackets;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+
+import java.util.List;
 
 public class TradeScreenHandler extends ScreenHandler {
+    private static final int INPUT_SLOT = 0;
+    private static final int OUTPUT_SLOT = 1;
+    private static final int PLAYER_INV_START = 2;
+    private static final int PLAYER_INV_END = 38;
+
+    private static final int RIGHT_PANEL_X = 96;
+    private static final int TOP_PANEL_HEIGHT = 48;
+
+    public static final int SELECT_TRADE_BASE_BUTTON_ID = 1000;
+
     private final SimpleInventory inputInventory;
-    private final PlayerEntity player;
+    private final ScreenHandlerContext context;
+    private int selectedTradeIndex;
+    private int lastXpReward;
 
     public TradeScreenHandler(int syncId, PlayerInventory playerInventory) {
+        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
+    }
+
+    public TradeScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(TradePackets.TRADE_SCREEN_HANDLER, syncId);
         this.inputInventory = new SimpleInventory(1);
-        this.player = playerInventory.player;
+        this.context = context;
 
-        // Input slot
-        this.addSlot(new Slot(inputInventory, 0, 27, 18));
+        this.addSlot(new Slot(inputInventory, INPUT_SLOT, RIGHT_PANEL_X + 20, 16));
+        this.addSlot(new TradeOutputSlot(this, RIGHT_PANEL_X + 92, 16));
 
-        // Output slot (virtual)
-        this.addSlot(new TradeOutputSlot(this, 135, 18));
-
-        // Player inventory
+        int playerInvY = TOP_PANEL_HEIGHT + 28;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 50 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, RIGHT_PANEL_X + 8 + col * 18, playerInvY + row * 18));
             }
         }
 
-        // Player hotbar
+        int hotbarY = playerInvY + 58;
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 108));
+            this.addSlot(new Slot(playerInventory, col, RIGHT_PANEL_X + 8 + col * 18, hotbarY));
         }
     }
 
-    private TradeConfig.TradeEntry findTrade() {
-        ItemStack input = inputInventory.getStack(0);
-        if (input.isEmpty()) return null;
+    private List<TradeConfig.TradeEntry> getTrades() {
+        return TradeConfig.getTrades();
+    }
 
-        for (TradeConfig.TradeEntry trade : TradeConfig.getTrades()) {
-            if (trade.getInputItem() == null || trade.getOutputItem() == null) {
-                continue; // Skip invalid entries
-            }
-            if (input.getItem() == trade.getInputItem() && input.getCount() >= trade.inputCount) {
-                return trade;
+    public int getTradeCount() {
+        return getTrades().size();
+    }
+
+    public int getSelectedTradeIndex() {
+        int count = getTradeCount();
+        if (count <= 0) {
+            selectedTradeIndex = 0;
+            return 0;
+        }
+        if (selectedTradeIndex < 0 || selectedTradeIndex >= count) {
+            selectedTradeIndex = 0;
+        }
+        return selectedTradeIndex;
+    }
+
+    public TradeConfig.TradeEntry getSelectedTrade() {
+        List<TradeConfig.TradeEntry> trades = getTrades();
+        if (trades.isEmpty()) {
+            selectedTradeIndex = 0;
+            return null;
+        }
+        return trades.get(getSelectedTradeIndex());
+    }
+
+    public TradeConfig.TradeEntry getTradeAt(int index) {
+        List<TradeConfig.TradeEntry> trades = getTrades();
+        if (index < 0 || index >= trades.size()) {
+            return null;
+        }
+        return trades.get(index);
+    }
+
+    public boolean canAffordTradeAt(int index) {
+        TradeConfig.TradeEntry trade = getTradeAt(index);
+        if (trade == null || trade.inputCount <= 0) {
+            return false;
+        }
+
+        Item inputItem = trade.getInputItem();
+        if (inputItem == null) {
+            return false;
+        }
+
+        int total = 0;
+
+        ItemStack input = inputInventory.getStack(INPUT_SLOT);
+        if (!input.isEmpty() && input.getItem() == inputItem) {
+            total += input.getCount();
+        }
+
+        for (int i = PLAYER_INV_START; i < PLAYER_INV_END; i++) {
+            ItemStack stack = this.slots.get(i).getStack();
+            if (!stack.isEmpty() && stack.getItem() == inputItem) {
+                total += stack.getCount();
+                if (total >= trade.inputCount) {
+                    return true;
+                }
             }
         }
-        return null;
+
+        return total >= trade.inputCount;
+    }
+
+    private boolean canExecuteTrade(TradeConfig.TradeEntry trade) {
+        if (trade == null || trade.inputCount <= 0 || trade.outputCount <= 0 || trade.xpReward < 0) {
+            return false;
+        }
+
+        Item inputItem = trade.getInputItem();
+        Item outputItem = trade.getOutputItem();
+        if (inputItem == null || outputItem == null) {
+            return false;
+        }
+
+        ItemStack input = inputInventory.getStack(INPUT_SLOT);
+        if (input.isEmpty() || input.getItem() != inputItem) {
+            return false;
+        }
+
+        if (trade.inputCount > input.getMaxCount()) {
+            return false;
+        }
+
+        return input.getCount() >= trade.inputCount;
     }
 
     public ItemStack getOutputPreview() {
-        TradeConfig.TradeEntry trade = findTrade();
-        if (trade == null || trade.getOutputItem() == null) {
+        TradeConfig.TradeEntry trade = getSelectedTrade();
+        if (!canExecuteTrade(trade)) {
             return ItemStack.EMPTY;
         }
-        return new ItemStack(trade.getOutputItem(), trade.outputCount);
+
+        Item outputItem = trade.getOutputItem();
+        if (outputItem == null) {
+            return ItemStack.EMPTY;
+        }
+
+        int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
+        if (safeOutputCount <= 0) {
+            return ItemStack.EMPTY;
+        }
+
+        return new ItemStack(outputItem, safeOutputCount);
     }
 
     public boolean hasValidTrade() {
-        return findTrade() != null;
+        return !getOutputPreview().isEmpty();
+    }
+
+    private void returnInputToPlayer(PlayerEntity player, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        ItemStack remaining = stack.copy();
+        if (!player.getInventory().insertStack(remaining) && !remaining.isEmpty()) {
+            player.dropItem(remaining, false);
+        }
+    }
+
+    private void autoFillSelectedTrade(PlayerEntity player) {
+        TradeConfig.TradeEntry trade = getSelectedTrade();
+        if (trade == null || trade.inputCount <= 0) {
+            return;
+        }
+
+        Item inputItem = trade.getInputItem();
+        if (inputItem == null) {
+            return;
+        }
+
+        int targetInputCount = Math.min(trade.inputCount, inputItem.getMaxCount());
+        ItemStack inputStack = inputInventory.getStack(INPUT_SLOT);
+
+        if (!inputStack.isEmpty() && inputStack.getItem() != inputItem) {
+            ItemStack toReturn = inputStack.copy();
+            inputInventory.setStack(INPUT_SLOT, ItemStack.EMPTY);
+            returnInputToPlayer(player, toReturn);
+            inputStack = ItemStack.EMPTY;
+        }
+
+        int currentCount = (!inputStack.isEmpty() && inputStack.getItem() == inputItem) ? inputStack.getCount() : 0;
+        int needed = targetInputCount - currentCount;
+        if (needed <= 0) {
+            inputInventory.markDirty();
+            sendContentUpdates();
+            return;
+        }
+
+        for (int i = PLAYER_INV_START; i < PLAYER_INV_END && needed > 0; i++) {
+            Slot sourceSlot = this.slots.get(i);
+            ItemStack sourceStack = sourceSlot.getStack();
+            if (sourceStack.isEmpty() || sourceStack.getItem() != inputItem) {
+                continue;
+            }
+
+            int move = Math.min(needed, sourceStack.getCount());
+            if (move <= 0) {
+                continue;
+            }
+
+            if (inputStack.isEmpty()) {
+                inputStack = new ItemStack(inputItem, move);
+                inputInventory.setStack(INPUT_SLOT, inputStack);
+            } else {
+                inputStack.increment(move);
+            }
+
+            sourceStack.decrement(move);
+            if (sourceStack.isEmpty()) {
+                sourceSlot.setStack(ItemStack.EMPTY);
+            } else {
+                sourceSlot.markDirty();
+            }
+
+            needed -= move;
+        }
+
+        inputInventory.markDirty();
+        sendContentUpdates();
+    }
+
+    private ItemStack executeTrade() {
+        lastXpReward = 0;
+
+        TradeConfig.TradeEntry trade = getSelectedTrade();
+        if (!canExecuteTrade(trade)) {
+            return ItemStack.EMPTY;
+        }
+
+        Item outputItem = trade.getOutputItem();
+        if (outputItem == null) {
+            return ItemStack.EMPTY;
+        }
+
+        int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
+        if (safeOutputCount <= 0) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack input = inputInventory.getStack(INPUT_SLOT);
+        input.decrement(trade.inputCount);
+        if (input.isEmpty()) {
+            inputInventory.setStack(INPUT_SLOT, ItemStack.EMPTY);
+        }
+        inputInventory.markDirty();
+
+        lastXpReward = trade.xpReward;
+        sendContentUpdates();
+        return new ItemStack(outputItem, safeOutputCount);
+    }
+
+    @Override
+    public boolean onButtonClick(PlayerEntity player, int id) {
+        if (id >= SELECT_TRADE_BASE_BUTTON_ID) {
+            int index = id - SELECT_TRADE_BASE_BUTTON_ID;
+            int tradeCount = getTradeCount();
+            if (index < 0 || index >= tradeCount) {
+                return false;
+            }
+
+            selectedTradeIndex = index;
+            if (!player.getWorld().isClient) {
+                autoFillSelectedTrade(player);
+            }
+            sendContentUpdates();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+        if (slotIndex < 0 || slotIndex >= this.slots.size()) {
+            return ItemStack.EMPTY;
+        }
+
         ItemStack result = ItemStack.EMPTY;
         Slot slot = this.slots.get(slotIndex);
 
@@ -76,17 +305,14 @@ public class TradeScreenHandler extends ScreenHandler {
             ItemStack slotStack = slot.getStack();
             result = slotStack.copy();
 
-            if (slotIndex == 0) {
-                // Input slot -> player inventory
-                if (!this.insertItem(slotStack, 2, 38, false)) {
+            if (slotIndex == INPUT_SLOT) {
+                if (!this.insertItem(slotStack, PLAYER_INV_START, PLAYER_INV_END, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (slotIndex == 1) {
-                // Output slot - do nothing here, trade happens via onTakeItem
+            } else if (slotIndex == OUTPUT_SLOT) {
                 return ItemStack.EMPTY;
             } else {
-                // Player inventory -> input slot
-                if (!this.insertItem(slotStack, 0, 1, false)) {
+                if (!this.insertItem(slotStack, INPUT_SLOT, INPUT_SLOT + 1, false)) {
                     return ItemStack.EMPTY;
                 }
             }
@@ -103,7 +329,7 @@ public class TradeScreenHandler extends ScreenHandler {
 
     @Override
     public boolean canUse(PlayerEntity player) {
-        return true;
+        return ScreenHandler.canUse(this.context, player, TradeBlocks.TRADE_BLOCK);
     }
 
     @Override
@@ -112,9 +338,6 @@ public class TradeScreenHandler extends ScreenHandler {
         dropInventory(player, inputInventory);
     }
 
-    /**
-     * Virtual output slot - executes trade on click (server-side only)
-     */
     private static class TradeOutputSlot extends Slot {
         private final TradeScreenHandler handler;
 
@@ -140,61 +363,33 @@ public class TradeScreenHandler extends ScreenHandler {
 
         @Override
         public void setStack(ItemStack stack) {
-            // Virtual slot - ignore
         }
 
         @Override
         public ItemStack takeStack(int amount) {
-            return handler.getOutputPreview().copy();
+            return handler.executeTrade();
         }
 
         @Override
         public void onTakeItem(PlayerEntity player, ItemStack stack) {
-            // This runs on SERVER side only
-            TradeConfig.TradeEntry trade = handler.findTrade();
-            if (trade == null) {
-                sendFailureMessage(player, "Invalid trade");
+            if (player.getWorld().isClient) {
                 return;
             }
 
-            ItemStack input = handler.inputInventory.getStack(0);
-            if (trade.getInputItem() == null || trade.getOutputItem() == null) {
-                sendFailureMessage(player, "Invalid trade configuration");
-                return;
-            }
-
-            if (input.getItem() != trade.getInputItem() || input.getCount() < trade.inputCount) {
-                sendFailureMessage(player, "Insufficient items");
-                return;
-            }
-
-            // Consume input
-            input.decrement(trade.inputCount);
-            if (input.isEmpty()) {
-                handler.inputInventory.setStack(0, ItemStack.EMPTY);
-            }
-
-            // Give output to player
-            ItemStack output = new ItemStack(trade.getOutputItem(), trade.outputCount);
-            if (!player.getInventory().insertStack(output)) {
-                player.dropItem(output, false);
-            }
-
-            // Give XP
-            player.addExperience(trade.xpReward);
-            player.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
-        }
-
-        private void sendFailureMessage(PlayerEntity player, String message) {
-            if (player instanceof ServerPlayerEntity) {
+            if (stack.isEmpty()) {
                 player.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                player.sendMessage(Text.literal("§c" + message), true);
+                return;
             }
+
+            if (handler.lastXpReward > 0) {
+                player.addExperience(handler.lastXpReward);
+            }
+            handler.lastXpReward = 0;
+            player.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
         }
 
         @Override
         public void markDirty() {
-            // Virtual slot - ignore
         }
     }
 }

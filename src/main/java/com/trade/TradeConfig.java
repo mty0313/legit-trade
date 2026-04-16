@@ -17,6 +17,7 @@ import java.util.List;
 
 public class TradeConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
+	private static final int MAX_STACK_COUNT = 64;
 	private static volatile List<TradeEntry> trades = Collections.emptyList();
 
 	public static List<TradeEntry> getTrades() {
@@ -61,8 +62,17 @@ public class TradeConfig {
 			if (!Registries.ITEM.containsId(inputId) || !Registries.ITEM.containsId(outputId)) {
 				return false;
 			}
-			return inputCount > 0 && outputCount > 0 && xpReward >= 0;
+			return inputCount >= 1 && inputCount <= MAX_STACK_COUNT
+				&& outputCount >= 1 && outputCount <= MAX_STACK_COUNT
+				&& xpReward >= 0;
 		}
+	}
+
+	private static int clampTradeCount(int count) {
+		if (count <= 0) {
+			return 1;
+		}
+		return Math.min(count, MAX_STACK_COUNT);
 	}
 
 	// Gson deserialization target - uses mutable fields
@@ -74,7 +84,7 @@ public class TradeConfig {
 		int xpReward = 0;
 
 		TradeEntry toTradeEntry() {
-			return new TradeEntry(input, output, inputCount, outputCount, xpReward);
+			return new TradeEntry(input, output, clampTradeCount(inputCount), clampTradeCount(outputCount), xpReward);
 		}
 	}
 

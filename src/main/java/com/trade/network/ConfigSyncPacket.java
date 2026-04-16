@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigSyncPacket {
+    private static final int MAX_TRADES = 1024;
+    private static final int MAX_ITEM_ID_LENGTH = 128;
+
     public static final Identifier ID = new Identifier(LegitTrade.MOD_ID, "config_sync");
 
     public static PacketByteBuf write(List<TradeConfig.TradeEntry> trades) {
@@ -27,17 +30,29 @@ public class ConfigSyncPacket {
     }
 
     public static List<TradeConfig.TradeEntry> read(PacketByteBuf buf) {
-        int size = buf.readInt();
-        List<TradeConfig.TradeEntry> trades = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            String input = buf.readString();
-            String output = buf.readString();
-            int inputCount = buf.readInt();
-            int outputCount = buf.readInt();
-            int xpReward = buf.readInt();
-            trades.add(new TradeConfig.TradeEntry(input, output, inputCount, outputCount, xpReward));
+        try {
+            int size = buf.readInt();
+            if (size < 0 || size > MAX_TRADES) {
+                return List.of();
+            }
+
+            List<TradeConfig.TradeEntry> trades = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                String input = buf.readString(MAX_ITEM_ID_LENGTH);
+                String output = buf.readString(MAX_ITEM_ID_LENGTH);
+                int inputCount = buf.readInt();
+                int outputCount = buf.readInt();
+                int xpReward = buf.readInt();
+
+                TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(input, output, inputCount, outputCount, xpReward);
+                if (entry.isValid()) {
+                    trades.add(entry);
+                }
+            }
+            return trades;
+        } catch (RuntimeException ignored) {
+            return List.of();
         }
-        return trades;
     }
 
     public static void sendToClient(net.minecraft.server.network.ServerPlayerEntity player) {
