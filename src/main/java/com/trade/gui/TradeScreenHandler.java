@@ -34,6 +34,7 @@ public class TradeScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
     private int selectedTradeIndex;
     private int lastXpReward;
+    private boolean suppressContentChanged;
 
     public TradeScreenHandler(int syncId, PlayerInventory playerInventory) {
         this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
@@ -45,7 +46,9 @@ public class TradeScreenHandler extends ScreenHandler {
             @Override
             public void markDirty() {
                 super.markDirty();
-                TradeScreenHandler.this.onContentChanged(this);
+                if (!TradeScreenHandler.this.suppressContentChanged) {
+                    TradeScreenHandler.this.onContentChanged(this);
+                }
             }
         };
         this.outputInventory = new SimpleInventory(1);
@@ -158,6 +161,50 @@ public class TradeScreenHandler extends ScreenHandler {
         return input.getCount() >= trade.inputCount;
     }
 
+    private boolean canInsertIntoPlayerInventory(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        int remaining = stack.getCount();
+
+        for (int i = PLAYER_INV_START; i < PLAYER_INV_END; i++) {
+            ItemStack playerStack = this.slots.get(i).getStack();
+            if (playerStack.isEmpty()) {
+                remaining = Math.max(0, remaining - stack.getMaxCount());
+            } else if (ItemStack.canCombine(playerStack, stack)) {
+                int free = playerStack.getMaxCount() - playerStack.getCount();
+                if (free > 0) {
+                    remaining = Math.max(0, remaining - free);
+                }
+            }
+
+            if (remaining <= 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private ItemStack createOutputStack(TradeConfig.TradeEntry trade) {
+        if (trade == null) {
+            return ItemStack.EMPTY;
+        }
+
+        Item outputItem = trade.getOutputItem();
+        if (outputItem == null) {
+            return ItemStack.EMPTY;
+        }
+
+        int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
+        if (safeOutputCount <= 0) {
+            return ItemStack.EMPTY;
+        }
+
+        return new ItemStack(outputItem, safeOutputCount);
+    }
+
     private void refreshOutputPreview() {
         context.run((world, pos) -> {
             if (world.isClient) {
@@ -167,13 +214,7 @@ public class TradeScreenHandler extends ScreenHandler {
             ItemStack preview = ItemStack.EMPTY;
             TradeConfig.TradeEntry trade = getSelectedTrade();
             if (canExecuteTrade(trade)) {
-                Item outputItem = trade.getOutputItem();
-                if (outputItem != null) {
-                    int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
-                    if (safeOutputCount > 0) {
-                        preview = new ItemStack(outputItem, safeOutputCount);
-                    }
-                }
+                preview = createOutputStack(trade);
             }
 
             outputInventory.setStack(0, preview);
@@ -263,23 +304,33 @@ public class TradeScreenHandler extends ScreenHandler {
     }
 
     private ItemStack executeTrade() {
+        return executeTradeInternal(true);
+    }
+
+    private ItemStack executeTradeInternal(boolean syncAfterTrade) {
         lastXpReward = 0;
 
         TradeConfig.TradeEntry trade = getSelectedTrade();
         if (!canExecuteTrade(trade)) {
-            refreshOutputPreview();
+            if (syncAfterTrade) {
+                refreshOutputPreview();
+            }
             return ItemStack.EMPTY;
         }
 
         Item outputItem = trade.getOutputItem();
         if (outputItem == null) {
-            refreshOutputPreview();
+            if (syncAfterTrade) {
+                refreshOutputPreview();
+            }
             return ItemStack.EMPTY;
         }
 
         int safeOutputCount = Math.min(trade.outputCount, outputItem.getMaxCount());
         if (safeOutputCount <= 0) {
-            refreshOutputPreview();
+            if (syncAfterTrade) {
+                refreshOutputPreview();
+            }
             return ItemStack.EMPTY;
         }
 
@@ -292,8 +343,10 @@ public class TradeScreenHandler extends ScreenHandler {
 
         lastXpReward = trade.xpReward;
         ItemStack result = new ItemStack(outputItem, safeOutputCount);
-        refreshOutputPreview();
-        sendContentUpdates();
+        if (syncAfterTrade) {
+            refreshOutputPreview();
+            sendContentUpdates();
+        }
         return result;
     }
 
@@ -335,6 +388,62 @@ public class TradeScreenHandler extends ScreenHandler {
                     return ItemStack.EMPTY;
                 }
             } else if (slotIndex == OUTPUT_SLOT) {
+                long totalXp = 0L;
+                int craftedCount = 0;
+                final int maxCraftIterations = 2048;
+
+                suppressContentChanged = true;
+                try {
+                    while (craftedCount < maxCraftIterations) {
+                        TradeConfig.TradeEntry trade = getSelectedTrade();
+                        if (!canExecuteTrade(trade)) {
+                            break;
+                        }
+
+                        ItemStack preview = createOutputStack(trade);
+                        if (preview.isEmpty() || !canInsertIntoPlayerInventory(preview.copy())) {
+                            break;
+                        }
+
+                        ItemStack crafted = executeTradeInternal(false);
+                        if (crafted.isEmpty()) {
+                            break;
+                        }
+
+                        ItemStack toInsert = crafted.copy();
+                        if (!this.insertItem(toInsert, PLAYER_INV_START, PLAYER_INV_END, false)) {
+                            break;
+                        }
+
+                        if (!toInsert.isEmpty()) {
+                            break;
+                        }
+
+                        result = crafted.copy();
+                        totalXp += Math.max(0, trade.xpReward);
+                        craftedCount++;
+                    }
+                } finally {
+                    suppressContentChanged = false;
+                }
+
+                if (craftedCount > 0) {
+                    refreshOutputPreview();
+                    sendContentUpdates();
+
+                    if (!player.getWorld().isClient && totalXp > 0) {
+                        player.addExperience((int) Math.min(Integer.MAX_VALUE, totalXp));
+                    }
+                    if (!player.getWorld().isClient) {
+                        player.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
+                    }
+                    lastXpReward = 0;
+                    return result;
+                }
+
+                if (!player.getWorld().isClient) {
+                    player.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                }
                 return ItemStack.EMPTY;
             } else {
                 if (!this.insertItem(slotStack, INPUT_SLOT, INPUT_SLOT + 1, false)) {
