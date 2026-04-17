@@ -29,6 +29,7 @@ public class ConfigSyncPacket {
                 buf.writeInt(trade.inputCount);
                 buf.writeInt(trade.outputCount);
                 buf.writeInt(trade.xpReward);
+                buf.writeBoolean(trade.favorite);
             }
         }
         return buf;
@@ -56,8 +57,9 @@ public class ConfigSyncPacket {
                     int inputCount = buf.readInt();
                     int outputCount = buf.readInt();
                     int xpReward = buf.readInt();
+                    boolean favorite = buf.readBoolean();
 
-                    TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(input, output, inputCount, outputCount, xpReward);
+                    TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(input, output, inputCount, outputCount, xpReward, favorite);
                     if (entry.isValid()) {
                         trades.add(entry);
                     }
@@ -74,6 +76,10 @@ public class ConfigSyncPacket {
     }
 
     public static void sendToClient(net.minecraft.server.network.ServerPlayerEntity player) {
-        ServerPlayNetworking.send(player, ID, write(TradeConfig.getTradeGroups()));
+        sendToClient(player, TradeConfig.getTradeGroups());
+    }
+
+    public static void sendToClient(net.minecraft.server.network.ServerPlayerEntity player, List<TradeConfig.TradeGroup> groups) {
+        ServerPlayNetworking.send(player, ID, write(groups));
     }
 }

@@ -1,5 +1,6 @@
 package com.trade.block;
 
+import com.trade.TradeFavoritesConfig;
 import com.trade.gui.TradeScreenHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -48,7 +49,17 @@ public class TradeBlock extends Block {
 
     private NamedScreenHandlerFactory createScreenHandlerFactory(World world, BlockPos pos) {
         return new SimpleNamedScreenHandlerFactory(
-            (syncId, playerInventory, player) -> new TradeScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(world, pos)),
+            (syncId, playerInventory, player) -> {
+                if (player instanceof ServerPlayerEntity serverPlayer) {
+                    return new TradeScreenHandler(
+                        syncId,
+                        playerInventory,
+                        ScreenHandlerContext.create(world, pos),
+                        TradeFavoritesConfig.flattenGroups(TradeFavoritesConfig.getOrderedGroupsForPlayer(serverPlayer.getUuid()))
+                    );
+                }
+                return new TradeScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(world, pos));
+            },
             Text.translatable("screen.legittrade.trade")
         );
     }

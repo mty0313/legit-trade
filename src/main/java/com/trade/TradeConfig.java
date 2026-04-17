@@ -28,6 +28,7 @@ public class TradeConfig {
 	public static final int MAX_TRADES_PER_GROUP = 1024;
 	public static final int MAX_ITEM_ID_LENGTH = 128;
 	public static final int MAX_GROUP_NAME_LENGTH = 64;
+	private static final String FAVORITE_KEY_SEPARATOR = "\u001F";
 	private static volatile List<TradeGroup> tradeGroups = Collections.emptyList();
 	private static volatile List<TradeEntry> trades = Collections.emptyList();
 
@@ -54,6 +55,19 @@ public class TradeConfig {
 		setTradeGroups(List.of(new TradeGroup("Default", newTrades)));
 	}
 
+	public static String buildTradeKey(String groupName, TradeEntry trade) {
+		if (trade == null) {
+			return "";
+		}
+		String safeGroup = (groupName == null || groupName.isBlank()) ? "Default" : groupName;
+		return safeGroup + FAVORITE_KEY_SEPARATOR
+			+ trade.input + FAVORITE_KEY_SEPARATOR
+			+ trade.output + FAVORITE_KEY_SEPARATOR
+			+ trade.inputCount + FAVORITE_KEY_SEPARATOR
+			+ trade.outputCount + FAVORITE_KEY_SEPARATOR
+			+ trade.xpReward;
+	}
+
 	public static final class TradeGroup {
 		public final String group;
 		public final List<TradeEntry> trades;
@@ -70,13 +84,26 @@ public class TradeConfig {
 		public final int inputCount;
 		public final int outputCount;
 		public final int xpReward;
+		public final boolean favorite;
 
 		public TradeEntry(String input, String output, int inputCount, int outputCount, int xpReward) {
+			this(input, output, inputCount, outputCount, xpReward, false);
+		}
+
+		public TradeEntry(String input, String output, int inputCount, int outputCount, int xpReward, boolean favorite) {
 			this.input = input;
 			this.output = output;
 			this.inputCount = inputCount;
 			this.outputCount = outputCount;
 			this.xpReward = xpReward;
+			this.favorite = favorite;
+		}
+
+		public TradeEntry withFavorite(boolean value) {
+			if (this.favorite == value) {
+				return this;
+			}
+			return new TradeEntry(input, output, inputCount, outputCount, xpReward, value);
 		}
 
 		public Item getInputItem() {

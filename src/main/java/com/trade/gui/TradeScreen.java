@@ -1,8 +1,10 @@
 package com.trade.gui;
 
 import com.trade.TradeConfig;
+import com.trade.network.FavoriteTogglePacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -34,6 +36,9 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
     private static final int LIST_CONTENT_Y = LEFT_PANEL_Y + 14;
     private static final int LIST_ROW_HEIGHT = 16;
     private static final int LIST_MAX_ROWS = 10;
+
+    private static final int STAR_SIZE = 7;
+    private static final int STAR_X = LEFT_PANEL_X + 3;
 
     private int listScrollOffset;
     private int currentGroupIndex;
@@ -187,6 +192,28 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         }
     }
 
+    private void drawStarGlyph(DrawContext context, int x, int y, boolean filled, int color) {
+        if (filled) {
+            context.fill(x + 3, y, x + 4, y + 1, color);
+            context.fill(x + 2, y + 1, x + 5, y + 2, color);
+            context.fill(x, y + 2, x + 7, y + 3, color);
+            context.fill(x + 2, y + 3, x + 5, y + 4, color);
+            context.fill(x + 1, y + 4, x + 3, y + 6, color);
+            context.fill(x + 4, y + 4, x + 6, y + 6, color);
+            context.fill(x + 3, y + 6, x + 4, y + 7, color);
+            return;
+        }
+
+        context.fill(x + 3, y, x + 4, y + 1, color);
+        context.fill(x + 2, y + 1, x + 3, y + 2, color);
+        context.fill(x + 4, y + 1, x + 5, y + 2, color);
+        context.fill(x, y + 2, x + 1, y + 3, color);
+        context.fill(x + 6, y + 2, x + 7, y + 3, color);
+        context.fill(x + 1, y + 4, x + 2, y + 5, color);
+        context.fill(x + 5, y + 4, x + 6, y + 5, color);
+        context.fill(x + 3, y + 6, x + 4, y + 7, color);
+    }
+
     private void drawTradeList(DrawContext context, int localMouseX, int localMouseY) {
         List<TradeConfig.TradeEntry> groupTrades = getCurrentGroupTrades();
         if (groupTrades.isEmpty()) {
@@ -204,24 +231,32 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
             int rowY = LIST_CONTENT_Y + row * LIST_ROW_HEIGHT;
             int globalIndex = groupStart + i;
 
-            int color = 0xFF2A2A2A;
-            if (globalIndex == selected) {
-                color = 0xFF335577;
-            } else if (globalIndex == hovered) {
-                color = 0xFF3A3A3A;
+            TradeConfig.TradeEntry trade = groupTrades.get(i);
+            boolean rowHovered = globalIndex == hovered;
+            boolean rowSelected = globalIndex == selected;
+
+            int color = trade.favorite ? 0xFF6F5A1D : 0xFF2A2A2A;
+            if (rowSelected) {
+                color = trade.favorite ? 0xFF8A7126 : 0xFF335577;
+            } else if (rowHovered) {
+                color = trade.favorite ? 0xFF7B6421 : 0xFF3A3A3A;
             }
             context.fill(LEFT_PANEL_X + 2, rowY - 1, LEFT_PANEL_X + LEFT_PANEL_WIDTH - 2, rowY + LIST_ROW_HEIGHT - 2, color);
 
-            TradeConfig.TradeEntry trade = groupTrades.get(i);
+            if (trade.favorite || rowHovered) {
+                int starY = rowY + (LIST_ROW_HEIGHT - STAR_SIZE) / 2 - 1;
+                drawStarGlyph(context, STAR_X, starY, trade.favorite, trade.favorite ? 0xFFF7D96A : 0xFFBEBEBE);
+            }
+
             boolean affordable = handler.canAffordTradeAt(globalIndex);
             ItemStack inputIcon = trade.getInputItem() != null ? new ItemStack(trade.getInputItem()) : ItemStack.EMPTY;
             ItemStack outputIcon = trade.getOutputItem() != null ? new ItemStack(trade.getOutputItem()) : ItemStack.EMPTY;
 
-            int inputIconX = LEFT_PANEL_X + 4;
-            int inputCountX = LEFT_PANEL_X + 22;
-            int arrowX = LEFT_PANEL_X + 36;
-            int outputIconX = LEFT_PANEL_X + 46;
-            int outputCountX = LEFT_PANEL_X + 64;
+            int inputIconX = LEFT_PANEL_X + 10;
+            int inputCountX = LEFT_PANEL_X + 28;
+            int arrowX = LEFT_PANEL_X + 42;
+            int outputIconX = LEFT_PANEL_X + 52;
+            int outputCountX = LEFT_PANEL_X + 70;
 
             if (!inputIcon.isEmpty()) {
                 context.drawItem(inputIcon, inputIconX, rowY - 1);
@@ -334,7 +369,13 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
                     return true;
                 }
 
-                int index = getClickedTradeIndex(mouseY);
+                int starIndex = getClickedTradeIndex(localMouseY);
+                if (isInStarHitBox(localMouseX, localMouseY, starIndex)) {
+                    toggleFavorite(starIndex);
+                    return true;
+                }
+
+                int index = getClickedTradeIndex(localMouseY);
                 if (index >= 0 && index < handler.getTradeCount()) {
                     int id = TradeScreenHandler.SELECT_TRADE_BASE_BUTTON_ID + index;
                     this.client.interactionManager.clickButton(this.handler.syncId, id);
@@ -346,8 +387,7 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private int getClickedTradeIndex(double mouseY) {
-        int localY = (int) mouseY - this.y;
+    private int getClickedTradeIndex(int localY) {
         if (localY < LIST_CONTENT_Y || localY >= LIST_CONTENT_Y + LIST_MAX_ROWS * LIST_ROW_HEIGHT) {
             return -1;
         }
@@ -364,6 +404,40 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
         }
 
         return getCurrentGroupStartOffset() + indexInGroup;
+    }
+
+    private boolean isInStarHitBox(int localMouseX, int localMouseY, int globalTradeIndex) {
+        if (globalTradeIndex < 0 || globalTradeIndex >= TradeConfig.getTrades().size()) {
+            return false;
+        }
+        int indexInGroup = globalTradeIndex - getCurrentGroupStartOffset();
+        int row = indexInGroup - listScrollOffset;
+        if (row < 0 || row >= LIST_MAX_ROWS) {
+            return false;
+        }
+
+        int rowY = LIST_CONTENT_Y + row * LIST_ROW_HEIGHT;
+        int starY = rowY + (LIST_ROW_HEIGHT - STAR_SIZE) / 2 - 1;
+        return localMouseX >= STAR_X && localMouseX < STAR_X + STAR_SIZE
+            && localMouseY >= starY && localMouseY < starY + STAR_SIZE;
+    }
+
+    private void toggleFavorite(int globalTradeIndex) {
+        List<TradeConfig.TradeGroup> groups = TradeConfig.getTradeGroups();
+        if (groups.isEmpty() || globalTradeIndex < 0 || globalTradeIndex >= TradeConfig.getTrades().size()) {
+            return;
+        }
+
+        clampGroupIndex();
+        TradeConfig.TradeGroup currentGroup = groups.get(currentGroupIndex);
+        int indexInGroup = globalTradeIndex - getCurrentGroupStartOffset();
+        if (indexInGroup < 0 || indexInGroup >= currentGroup.trades.size()) {
+            return;
+        }
+
+        TradeConfig.TradeEntry trade = currentGroup.trades.get(indexInGroup);
+        String tradeKey = TradeConfig.buildTradeKey(currentGroup.group, trade);
+        ClientPlayNetworking.send(FavoriteTogglePacket.ID, FavoriteTogglePacket.write(currentGroup.group, tradeKey, !trade.favorite));
     }
 
     private int getHoveredTradeIndex(int localMouseX, int localMouseY) {

@@ -14,6 +14,8 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TradeScreenHandler extends ScreenHandler {
@@ -32,16 +34,22 @@ public class TradeScreenHandler extends ScreenHandler {
     private final SimpleInventory inputInventory;
     private final SimpleInventory outputInventory;
     private final ScreenHandlerContext context;
+    private List<TradeConfig.TradeEntry> availableTrades;
     private int selectedTradeIndex;
     private int lastXpReward;
     private boolean suppressContentChanged;
 
     public TradeScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
+        this(syncId, playerInventory, ScreenHandlerContext.EMPTY, TradeConfig.getTrades());
     }
 
     public TradeScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+        this(syncId, playerInventory, context, TradeConfig.getTrades());
+    }
+
+    public TradeScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, List<TradeConfig.TradeEntry> trades) {
         super(TradePackets.TRADE_SCREEN_HANDLER, syncId);
+        this.availableTrades = Collections.unmodifiableList(new ArrayList<>(trades));
         this.inputInventory = new SimpleInventory(1) {
             @Override
             public void markDirty() {
@@ -71,7 +79,39 @@ public class TradeScreenHandler extends ScreenHandler {
     }
 
     private List<TradeConfig.TradeEntry> getTrades() {
-        return TradeConfig.getTrades();
+        return availableTrades;
+    }
+
+    public void setAvailableTrades(List<TradeConfig.TradeEntry> newTrades) {
+        TradeConfig.TradeEntry previous = getSelectedTrade();
+        this.availableTrades = Collections.unmodifiableList(new ArrayList<>(newTrades));
+
+        if (availableTrades.isEmpty()) {
+            selectedTradeIndex = 0;
+            inputInventory.setStack(INPUT_SLOT, ItemStack.EMPTY);
+        } else if (previous != null) {
+            int remapped = findTradeIndex(previous);
+            selectedTradeIndex = remapped >= 0 ? remapped : Math.min(selectedTradeIndex, availableTrades.size() - 1);
+        } else {
+            selectedTradeIndex = Math.min(selectedTradeIndex, availableTrades.size() - 1);
+        }
+
+        refreshOutputPreview();
+        sendContentUpdates();
+    }
+
+    private int findTradeIndex(TradeConfig.TradeEntry target) {
+        for (int i = 0; i < availableTrades.size(); i++) {
+            TradeConfig.TradeEntry entry = availableTrades.get(i);
+            if (entry.input.equals(target.input)
+                && entry.output.equals(target.output)
+                && entry.inputCount == target.inputCount
+                && entry.outputCount == target.outputCount
+                && entry.xpReward == target.xpReward) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public int getTradeCount() {
