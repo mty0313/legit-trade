@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -23,6 +24,10 @@ import java.util.Set;
 public class TradeConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
 	private static final int MAX_STACK_COUNT = 64;
+	public static final int MAX_GROUPS = 128;
+	public static final int MAX_TRADES_PER_GROUP = 1024;
+	public static final int MAX_ITEM_ID_LENGTH = 128;
+	public static final int MAX_GROUP_NAME_LENGTH = 64;
 	private static volatile List<TradeGroup> tradeGroups = Collections.emptyList();
 	private static volatile List<TradeEntry> trades = Collections.emptyList();
 
@@ -91,12 +96,17 @@ public class TradeConfig {
 		}
 
 		public boolean isValid() {
+			if (input == null || output == null) {
+				return false;
+			}
 			Identifier inputId = Identifier.tryParse(input);
 			Identifier outputId = Identifier.tryParse(output);
 			if (inputId == null || outputId == null) {
 				return false;
 			}
-			return Registries.ITEM.containsId(inputId)
+			return input.length() <= MAX_ITEM_ID_LENGTH
+				&& output.length() <= MAX_ITEM_ID_LENGTH
+				&& Registries.ITEM.containsId(inputId)
 				&& Registries.ITEM.containsId(outputId)
 				&& inputCount >= 1 && inputCount <= MAX_STACK_COUNT
 				&& outputCount >= 1 && outputCount <= MAX_STACK_COUNT
@@ -139,10 +149,18 @@ public class TradeConfig {
 		}
 
 		for (RawTradeGroup rawGroup : rawGroups) {
+			if (groups.size() >= MAX_GROUPS) {
+				LOGGER.warn("Too many trade groups in config, ignoring groups beyond limit {}", MAX_GROUPS);
+				break;
+			}
 			if (rawGroup == null) {
 				continue;
 			}
 			String groupName = (rawGroup.group == null || rawGroup.group.isBlank()) ? "Default" : rawGroup.group;
+			if (groupName.length() > MAX_GROUP_NAME_LENGTH) {
+				LOGGER.warn("Trade group name too long, skipping group '{}': max {} characters", groupName, MAX_GROUP_NAME_LENGTH);
+				continue;
+			}
 			List<TradeEntry> validTrades = toValidTrades(rawGroup.trades, groupName);
 			if (!validTrades.isEmpty()) {
 				groups.add(new TradeGroup(groupName, validTrades));
@@ -159,6 +177,10 @@ public class TradeConfig {
 
 		Set<String> seen = new HashSet<>();
 		for (RawTradeEntry raw : rawList) {
+			if (validTrades.size() >= MAX_TRADES_PER_GROUP) {
+				LOGGER.warn("Too many trades in group '{}', ignoring entries beyond limit {}", groupName, MAX_TRADES_PER_GROUP);
+				break;
+			}
 			if (raw == null) {
 				continue;
 			}
@@ -198,8 +220,12 @@ public class TradeConfig {
 		List<RawTradeEntry> trades = Collections.emptyList();
 	}
 
+	private static Path getConfigPath() {
+		return FabricLoader.getInstance().getConfigDir().resolve("legittrade.json");
+	}
+
 	public static void load() {
-		Path configPath = Path.of("config/legittrade.json");
+		Path configPath = getConfigPath();
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 		try {

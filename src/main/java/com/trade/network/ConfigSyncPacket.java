@@ -11,22 +11,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigSyncPacket {
-    private static final int MAX_GROUPS = 128;
-    private static final int MAX_TRADES_PER_GROUP = 1024;
-    private static final int MAX_ITEM_ID_LENGTH = 128;
-    private static final int MAX_GROUP_NAME_LENGTH = 64;
-
     public static final Identifier ID = new Identifier(LegitTrade.MOD_ID, "config_sync");
 
     public static PacketByteBuf write(List<TradeConfig.TradeGroup> groups) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeInt(groups.size());
-        for (TradeConfig.TradeGroup group : groups) {
-            buf.writeString(group.group, MAX_GROUP_NAME_LENGTH);
-            buf.writeInt(group.trades.size());
-            for (TradeConfig.TradeEntry trade : group.trades) {
-                buf.writeString(trade.input, MAX_ITEM_ID_LENGTH);
-                buf.writeString(trade.output, MAX_ITEM_ID_LENGTH);
+        int groupCount = Math.min(groups.size(), TradeConfig.MAX_GROUPS);
+        buf.writeInt(groupCount);
+        for (int g = 0; g < groupCount; g++) {
+            TradeConfig.TradeGroup group = groups.get(g);
+            buf.writeString(group.group, TradeConfig.MAX_GROUP_NAME_LENGTH);
+            int tradeCount = Math.min(group.trades.size(), TradeConfig.MAX_TRADES_PER_GROUP);
+            buf.writeInt(tradeCount);
+            for (int i = 0; i < tradeCount; i++) {
+                TradeConfig.TradeEntry trade = group.trades.get(i);
+                buf.writeString(trade.input, TradeConfig.MAX_ITEM_ID_LENGTH);
+                buf.writeString(trade.output, TradeConfig.MAX_ITEM_ID_LENGTH);
                 buf.writeInt(trade.inputCount);
                 buf.writeInt(trade.outputCount);
                 buf.writeInt(trade.xpReward);
@@ -38,22 +37,22 @@ public class ConfigSyncPacket {
     public static List<TradeConfig.TradeGroup> read(PacketByteBuf buf) {
         try {
             int groupCount = buf.readInt();
-            if (groupCount < 0 || groupCount > MAX_GROUPS) {
+            if (groupCount < 0 || groupCount > TradeConfig.MAX_GROUPS) {
                 return List.of();
             }
 
             List<TradeConfig.TradeGroup> groups = new ArrayList<>(groupCount);
             for (int g = 0; g < groupCount; g++) {
-                String groupName = buf.readString(MAX_GROUP_NAME_LENGTH);
+                String groupName = buf.readString(TradeConfig.MAX_GROUP_NAME_LENGTH);
                 int tradeCount = buf.readInt();
-                if (tradeCount < 0 || tradeCount > MAX_TRADES_PER_GROUP) {
+                if (tradeCount < 0 || tradeCount > TradeConfig.MAX_TRADES_PER_GROUP) {
                     return List.of();
                 }
 
                 List<TradeConfig.TradeEntry> trades = new ArrayList<>(tradeCount);
                 for (int i = 0; i < tradeCount; i++) {
-                    String input = buf.readString(MAX_ITEM_ID_LENGTH);
-                    String output = buf.readString(MAX_ITEM_ID_LENGTH);
+                    String input = buf.readString(TradeConfig.MAX_ITEM_ID_LENGTH);
+                    String output = buf.readString(TradeConfig.MAX_ITEM_ID_LENGTH);
                     int inputCount = buf.readInt();
                     int outputCount = buf.readInt();
                     int xpReward = buf.readInt();
