@@ -41,7 +41,13 @@ public class TradeScreenHandler extends ScreenHandler {
 
     public TradeScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(TradePackets.TRADE_SCREEN_HANDLER, syncId);
-        this.inputInventory = new SimpleInventory(1);
+        this.inputInventory = new SimpleInventory(1) {
+            @Override
+            public void markDirty() {
+                super.markDirty();
+                TradeScreenHandler.this.onContentChanged(this);
+            }
+        };
         this.outputInventory = new SimpleInventory(1);
         this.context = context;
 

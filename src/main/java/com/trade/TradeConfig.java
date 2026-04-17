@@ -96,7 +96,9 @@ public class TradeConfig {
 			if (inputId == null || outputId == null) {
 				return false;
 			}
-			return inputCount >= 1 && inputCount <= MAX_STACK_COUNT
+			return Registries.ITEM.containsId(inputId)
+				&& Registries.ITEM.containsId(outputId)
+				&& inputCount >= 1 && inputCount <= MAX_STACK_COUNT
 				&& outputCount >= 1 && outputCount <= MAX_STACK_COUNT
 				&& xpReward >= 0;
 		}
