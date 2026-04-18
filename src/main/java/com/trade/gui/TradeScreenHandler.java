@@ -27,7 +27,7 @@ public class TradeScreenHandler extends ScreenHandler {
     private static final int HOTBAR_Y = BG_HEIGHT - 36;
     private static final int PLAYER_INV_Y = HOTBAR_Y - 58;
 
-    public static final int SELECT_TRADE_BASE_BUTTON_ID = 1000;
+    public static final int SELECT_TRADE_BASE_BUTTON_ID = 0;
 
     private final SimpleInventory inputInventory;
     private final SimpleInventory outputInventory;

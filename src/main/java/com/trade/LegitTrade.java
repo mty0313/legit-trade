@@ -5,6 +5,7 @@ import com.trade.network.TradePackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 
@@ -13,9 +14,10 @@ public class LegitTrade implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        TradeConfig.load();
         TradeBlocks.register();
         TradePackets.register();
+
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> TradeConfig.load());
 
         // Sync config when player joins
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
