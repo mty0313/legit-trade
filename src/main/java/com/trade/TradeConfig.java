@@ -6,8 +6,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -28,6 +32,7 @@ public class TradeConfig {
 	public static final int MAX_TRADES_PER_GROUP = 1024;
 	public static final int MAX_ITEM_ID_LENGTH = 128;
 	public static final int MAX_GROUP_NAME_LENGTH = 64;
+	public static final int MAX_NBT_LENGTH = 4096;
 	private static volatile List<TradeGroup> tradeGroups = Collections.emptyList();
 	private static volatile List<TradeEntry> trades = Collections.emptyList();
 
@@ -67,16 +72,47 @@ public class TradeConfig {
 	public static final class TradeEntry {
 		public final String input;
 		public final String output;
+		public final String inputNbt;
+		public final String outputNbt;
 		public final int inputCount;
 		public final int outputCount;
 		public final int xpReward;
+		private final NbtCompound inputNbtCompound;
+		private final NbtCompound outputNbtCompound;
 
 		public TradeEntry(String input, String output, int inputCount, int outputCount, int xpReward) {
+			this(input, output, null, null, inputCount, outputCount, xpReward);
+		}
+
+		public TradeEntry(String input, String output, String inputNbt, String outputNbt, int inputCount, int outputCount, int xpReward) {
 			this.input = input;
 			this.output = output;
+			this.inputNbt = normalizeNbtString(inputNbt);
+			this.outputNbt = normalizeNbtString(outputNbt);
 			this.inputCount = inputCount;
 			this.outputCount = outputCount;
 			this.xpReward = xpReward;
+			this.inputNbtCompound = parseNbtSafely(this.inputNbt);
+			this.outputNbtCompound = parseNbtSafely(this.outputNbt);
+		}
+
+		private static String normalizeNbtString(String nbt) {
+			if (nbt == null) {
+				return null;
+			}
+			String trimmed = nbt.trim();
+			return trimmed.isEmpty() ? null : trimmed;
+		}
+
+		private static NbtCompound parseNbtSafely(String nbt) {
+			if (nbt == null) {
+				return null;
+			}
+			try {
+				return StringNbtReader.parse(nbt);
+			} catch (CommandSyntaxException ignored) {
+				return null;
+			}
 		}
 
 		public Item getInputItem() {
@@ -95,6 +131,46 @@ public class TradeConfig {
 			return Registries.ITEM.get(id);
 		}
 
+		public boolean matchesInputStack(ItemStack stack) {
+			Item item = getInputItem();
+			if (item == null || stack.isEmpty() || stack.getItem() != item) {
+				return false;
+			}
+			if (inputNbtCompound == null) {
+				return true;
+			}
+			NbtCompound stackNbt = stack.getNbt();
+			return stackNbt != null && stackNbt.equals(inputNbtCompound);
+		}
+
+		public ItemStack createInputPreviewStack() {
+			Item item = getInputItem();
+			if (item == null) {
+				return ItemStack.EMPTY;
+			}
+			ItemStack stack = new ItemStack(item, 1);
+			if (inputNbtCompound != null) {
+				stack.setNbt(inputNbtCompound.copy());
+			}
+			return stack;
+		}
+
+		public ItemStack createOutputStack() {
+			Item outputItem = getOutputItem();
+			if (outputItem == null) {
+				return ItemStack.EMPTY;
+			}
+			int safeOutputCount = Math.min(outputCount, outputItem.getMaxCount());
+			if (safeOutputCount <= 0) {
+				return ItemStack.EMPTY;
+			}
+			ItemStack stack = new ItemStack(outputItem, safeOutputCount);
+			if (outputNbtCompound != null) {
+				stack.setNbt(outputNbtCompound.copy());
+			}
+			return stack;
+		}
+
 		public boolean isValid() {
 			if (input == null || output == null) {
 				return false;
@@ -102,6 +178,12 @@ public class TradeConfig {
 			Identifier inputId = Identifier.tryParse(input);
 			Identifier outputId = Identifier.tryParse(output);
 			if (inputId == null || outputId == null) {
+				return false;
+			}
+			if (inputNbt != null && (inputNbt.length() > MAX_NBT_LENGTH || inputNbtCompound == null)) {
+				return false;
+			}
+			if (outputNbt != null && (outputNbt.length() > MAX_NBT_LENGTH || outputNbtCompound == null)) {
 				return false;
 			}
 			return input.length() <= MAX_ITEM_ID_LENGTH
@@ -191,7 +273,7 @@ public class TradeConfig {
 				continue;
 			}
 
-			String key = entry.input + "|" + entry.output + "|" + entry.inputCount + "|" + entry.outputCount + "|" + entry.xpReward;
+			String key = entry.input + "|" + entry.output + "|" + entry.inputCount + "|" + entry.outputCount + "|" + entry.xpReward + "|" + entry.inputNbt + "|" + entry.outputNbt;
 			if (!seen.add(key)) {
 				LOGGER.warn("Duplicate trade entry ignored in group '{}': {} -> {} (count: {}/{}, xp: {})",
 					groupName, entry.input, entry.output, entry.inputCount, entry.outputCount, entry.xpReward);
@@ -206,12 +288,16 @@ public class TradeConfig {
 	private static final class RawTradeEntry {
 		String input;
 		String output;
+		String inputNbt;
+		String outputNbt;
+		String nbt;
 		int inputCount = 1;
 		int outputCount = 1;
 		int xpReward = 0;
 
 		TradeEntry toTradeEntry() {
-			return new TradeEntry(input, output, clampTradeCount(inputCount), clampTradeCount(outputCount), xpReward);
+			String finalOutputNbt = (outputNbt != null && !outputNbt.isBlank()) ? outputNbt : nbt;
+			return new TradeEntry(input, output, inputNbt, finalOutputNbt, clampTradeCount(inputCount), clampTradeCount(outputCount), xpReward);
 		}
 	}
 
