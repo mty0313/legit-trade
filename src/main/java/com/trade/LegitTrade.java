@@ -23,6 +23,11 @@ public class LegitTrade implements ModInitializer {
             TradeConfig.load();
             WebConfig webConfig = WebConfig.load();
             WebServer.start(webConfig);
+            WebServer.setConfigSavedCallback(() -> server.execute(() -> {
+                for (net.minecraft.server.network.ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                    ConfigSyncPacket.sendToClient(player);
+                }
+            }));
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> WebServer.stopServer());

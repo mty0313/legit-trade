@@ -4,6 +4,61 @@ let selectedGroupIndex = -1;
 let selectedTradeIndex = -1;
 let editingTrade = null;
 let currentNbtTarget = null; // 'input' or 'output'
+let draggingGroupIndex = -1;
+const DEBUG = false;
+
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log(...args);
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function renderItemPreview(preview, itemId) {
+    const cleanId = (itemId || '').trim();
+    const item = cleanId ? items.find(i => i.id === cleanId) : null;
+
+    if (!cleanId) {
+        preview.innerHTML = `
+            <div class="preview-icon">--</div>
+            <div class="preview-info">
+                <div class="preview-name">未选择物品</div>
+                <div class="preview-id">请选择或搜索物品</div>
+            </div>
+        `;
+        preview.classList.add('show');
+        return;
+    }
+
+    if (!item) {
+        preview.innerHTML = `
+            <div class="preview-icon">${escapeHtml(cleanId.split(':')[1]?.substring(0, 4) || '??')}</div>
+            <div class="preview-info">
+                <div class="preview-name">未知物品</div>
+                <div class="preview-id">${escapeHtml(cleanId)}</div>
+            </div>
+        `;
+        preview.classList.add('show');
+        return;
+    }
+
+    preview.innerHTML = `
+        <div class="preview-icon">${escapeHtml(cleanId.split(':')[1]?.substring(0, 4) || '??')}</div>
+        <div class="preview-info">
+            <div class="preview-name">${escapeHtml(item.name || cleanId)}</div>
+            <div class="preview-id">${escapeHtml(cleanId)}</div>
+        </div>
+    `;
+    preview.classList.add('show');
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadItems();
@@ -117,25 +172,18 @@ function setupItemSearch(inputId, suggestionsId) {
     const preview = document.getElementById(previewId);
     let selectedIndex = -1;
     let displayedItems = [];
-    let loadedCount = 0;
-    const BATCH_SIZE = 50;
+    const MAX_DISPLAY = 100;
 
     input.addEventListener('focus', () => {
-        // Show first batch on focus
-        loadedCount = 0;
-        showSuggestions('', true);
+        showSuggestions('');
     });
 
     input.addEventListener('input', () => {
         const query = input.value.toLowerCase();
-        loadedCount = 0;
-        showSuggestions(query, true);
+        showSuggestions(query);
     });
 
-    function showSuggestions(query, reset = false) {
-        if (reset) {
-            loadedCount = 0;
-        }
+    function showSuggestions(query) {
 
         let filtered = items;
         if (query.length > 0) {
@@ -147,31 +195,29 @@ function setupItemSearch(inputId, suggestionsId) {
             });
         }
 
-        console.log('搜索结果:', filtered.length, '条', query ? `关键词: "${query}"` : '(全部)');
-        console.log(JSON.stringify(filtered, null, 2));
+        debugLog('搜索结果:', filtered.length, '条', query ? `关键词: "${query}"` : '(全部)');
 
-        displayedItems = filtered;
-        const batch = filtered.slice(loadedCount, loadedCount + BATCH_SIZE);
+        displayedItems = filtered.slice(0, MAX_DISPLAY);
 
-        if (batch.length === 0 && loadedCount === 0) {
+        if (displayedItems.length === 0) {
             suggestions.classList.remove('show');
             return;
         }
 
-        const hasMore = filtered.length > loadedCount + BATCH_SIZE;
+        const hasMore = filtered.length > MAX_DISPLAY;
 
-        suggestions.innerHTML = batch.map((item, index) => `
-            <div class="suggestion-item ${loadedCount + index === selectedIndex ? 'selected' : ''}" data-index="${loadedCount + index}" data-id="${item.id}">
-                <div class="item-icon">${getItemIconText(item)}</div>
+        suggestions.innerHTML = displayedItems.map((item, index) => `
+            <div class="suggestion-item ${index === selectedIndex ? 'selected' : ''}" data-index="${index}" data-id="${escapeHtml(item.id)}">
+                <div class="item-icon">${escapeHtml(getItemIconText(item))}</div>
                 <div class="item-info">
-                    <div class="item-name">${item.name || item.id}</div>
-                    <div class="item-id">${item.id}</div>
+                    <div class="item-name">${escapeHtml(item.name || item.id)}</div>
+                    <div class="item-id">${escapeHtml(item.id)}</div>
                 </div>
             </div>
         `).join('');
 
         if (hasMore) {
-            suggestions.innerHTML += `<div class="load-more" tabindex="0" data-count="${filtered.length}">加载更多 (${loadedCount + BATCH_SIZE}/${filtered.length})...</div>`;
+            suggestions.innerHTML += `<div class="load-more" tabindex="-1" aria-hidden="true">已展示前${MAX_DISPLAY}项，请缩小关键词继续搜索（共${filtered.length}项）</div>`;
         }
 
         suggestions.classList.add('show');
@@ -182,55 +228,6 @@ function setupItemSearch(inputId, suggestionsId) {
                 selectItem(el.dataset.id);
             });
         });
-
-        const loadMoreBtn = suggestions.querySelector('.load-more');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('mousedown', (e) => {
-                e.preventDefault(); // Prevent blur
-            });
-            loadMoreBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                loadedCount += BATCH_SIZE;
-                renderBatch(filtered, query);
-            });
-        }
-    }
-
-    function renderBatch(filtered, query) {
-        const batch = filtered.slice(loadedCount, loadedCount + BATCH_SIZE);
-        const hasMore = filtered.length > loadedCount + BATCH_SIZE;
-
-        suggestions.innerHTML = batch.map((item, index) => `
-            <div class="suggestion-item ${loadedCount + index === selectedIndex ? 'selected' : ''}" data-index="${loadedCount + index}" data-id="${item.id}">
-                <div class="item-icon">${getItemIconText(item)}</div>
-                <div class="item-info">
-                    <div class="item-name">${item.name || item.id}</div>
-                    <div class="item-id">${item.id}</div>
-                </div>
-            </div>
-        `).join('');
-
-        if (hasMore) {
-            suggestions.innerHTML += `<div class="load-more" tabindex="0" data-count="${filtered.length}">加载更多 (${loadedCount + BATCH_SIZE}/${filtered.length})...</div>`;
-        }
-
-        suggestions.querySelectorAll('.suggestion-item').forEach(el => {
-            el.addEventListener('click', () => {
-                selectItem(el.dataset.id);
-            });
-        });
-
-        const loadMoreBtn = suggestions.querySelector('.load-more');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-            });
-            loadMoreBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                loadedCount += BATCH_SIZE;
-                renderBatch(filtered, query);
-            });
-        }
     }
 
     function getItemIconText(item) {
@@ -251,24 +248,11 @@ function setupItemSearch(inputId, suggestionsId) {
     }
 
     function updatePreview(itemId) {
-        const item = items.find(i => i.id === itemId);
-        if (!item) {
-            preview.classList.remove('show');
-            return;
-        }
-
-        preview.innerHTML = `
-            <div class="preview-icon">${itemId.split(':')[1]?.substring(0, 4) || '??'}</div>
-            <div class="preview-info">
-                <div class="preview-name">${item.name || itemId}</div>
-                <div class="preview-id">${itemId}</div>
-            </div>
-        `;
-        preview.classList.add('show');
+        renderItemPreview(preview, itemId);
     }
 
     input.addEventListener('blur', (e) => {
-        // Don't hide if clicking inside suggestions (load more button)
+        // Don't hide if clicking inside suggestions
         setTimeout(() => {
             if (!suggestions.contains(document.activeElement)) {
                 suggestions.classList.remove('show');
@@ -340,7 +324,10 @@ function renderGroups() {
     const container = document.getElementById('groupsList');
     container.innerHTML = groups.map((group, index) => `
         <div class="group-item ${index === selectedGroupIndex ? 'active' : ''}" data-index="${index}">
-            <span class="group-name">${group.group}</span>
+            <div class="group-main">
+                <button class="drag-handle" title="拖拽排序" draggable="true" aria-label="拖拽排序">⋮⋮</button>
+                <span class="group-name">${escapeHtml(group.group)}</span>
+            </div>
             <div class="group-actions">
                 <button class="edit-btn" data-action="edit" title="编辑名称">✏️</button>
                 <button class="delete-btn" data-action="delete" title="删除分组">×</button>
@@ -349,13 +336,18 @@ function renderGroups() {
     `).join('');
 
     container.querySelectorAll('.group-item').forEach(el => {
+        const index = parseInt(el.dataset.index);
+        const dragHandle = el.querySelector('.drag-handle');
+
         el.addEventListener('click', (e) => {
+            if (e.target.classList.contains('drag-handle')) {
+                return;
+            }
             if (e.target.classList.contains('delete-btn')) {
-                deleteGroup(parseInt(el.dataset.index));
+                deleteGroup(index);
                 return;
             }
             if (e.target.classList.contains('edit-btn')) {
-                const index = parseInt(el.dataset.index);
                 const newName = prompt('输入新的分组名称:', groups[index].group);
                 if (newName && newName.trim()) {
                     groups[index].group = newName.trim();
@@ -366,7 +358,41 @@ function renderGroups() {
                 }
                 return;
             }
-            selectGroup(parseInt(el.dataset.index));
+            selectGroup(index);
+        });
+
+        dragHandle.addEventListener('dragstart', (e) => {
+            draggingGroupIndex = index;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(index));
+        });
+
+        dragHandle.addEventListener('dragend', () => {
+            draggingGroupIndex = -1;
+            container.querySelectorAll('.group-item').forEach(item => item.classList.remove('drag-over'));
+        });
+
+        el.addEventListener('dragover', (e) => {
+            if (draggingGroupIndex < 0 || draggingGroupIndex === index) {
+                return;
+            }
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            el.classList.add('drag-over');
+        });
+
+        el.addEventListener('dragleave', () => {
+            el.classList.remove('drag-over');
+        });
+
+        el.addEventListener('drop', (e) => {
+            e.preventDefault();
+            el.classList.remove('drag-over');
+            if (draggingGroupIndex < 0 || draggingGroupIndex === index) {
+                return;
+            }
+            moveGroupTo(draggingGroupIndex, index);
+            draggingGroupIndex = -1;
         });
     });
 }
@@ -397,16 +423,20 @@ function renderTrades() {
         return;
     }
 
-    container.innerHTML = group.trades.map((trade, index) => `
+    container.innerHTML = group.trades.map((trade, index) => {
+        const xp = Math.max(0, parseInt(trade.xpReward, 10) || 0);
+        return `
         <div class="trade-item ${index === selectedTradeIndex ? 'selected' : ''}" data-index="${index}">
             <div class="trade-info">
-                <span>${trade.inputCount}× ${getItemDisplayName(trade.input)}</span>
+                <span>${trade.inputCount}× ${escapeHtml(getItemDisplayName(trade.input))}</span>
                 <span class="trade-arrow">→</span>
-                <span>${trade.outputCount}× ${getItemDisplayName(trade.output)}</span>
+                <span>${trade.outputCount}× ${escapeHtml(getItemDisplayName(trade.output))}</span>
+                <span class="trade-xp">XP +${xp}</span>
             </div>
             <button class="delete-btn" data-action="delete">×</button>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     container.querySelectorAll('.trade-item').forEach(el => {
         el.addEventListener('click', (e) => {
@@ -415,11 +445,16 @@ function renderTrades() {
         });
 
         el.querySelector('.delete-btn').addEventListener('click', () => {
-            deleteTradeFromList(parseInt(el.dataset.index));
+            const index = parseInt(el.dataset.index);
+            if (!Number.isInteger(index)) {
+                return;
+            }
+            if (!confirm('确认删除这条交易吗？')) {
+                return;
+            }
+            deleteTradeFromList(index);
         });
     });
-
-    hideModal();
 }
 
 function getItemName(itemId) {
@@ -436,6 +471,26 @@ function getItemDisplayName(itemId) {
 function addGroup() {
     groups.push({ group: '新分组', trades: [] });
     selectedGroupIndex = groups.length - 1;
+    renderGroups();
+    renderTrades();
+}
+
+function moveGroupTo(fromIndex, toIndex) {
+    if (fromIndex < 0 || fromIndex >= groups.length || toIndex < 0 || toIndex >= groups.length || fromIndex === toIndex) {
+        return;
+    }
+
+    const [moved] = groups.splice(fromIndex, 1);
+    groups.splice(toIndex, 0, moved);
+
+    if (selectedGroupIndex === fromIndex) {
+        selectedGroupIndex = toIndex;
+    } else if (fromIndex < toIndex && selectedGroupIndex > fromIndex && selectedGroupIndex <= toIndex) {
+        selectedGroupIndex -= 1;
+    } else if (fromIndex > toIndex && selectedGroupIndex >= toIndex && selectedGroupIndex < fromIndex) {
+        selectedGroupIndex += 1;
+    }
+
     renderGroups();
     renderTrades();
 }
@@ -473,18 +528,19 @@ function showModal(trade) {
         updateNbtPreview('output', trade.outputNbt || '');
         document.getElementById('nbtMatchMode').value = trade.nbtMatchMode || 'exact';
         document.getElementById('xpReward').value = trade.xpReward || 0;
-        deleteBtn.style.display = 'inline-block';
+        renderItemPreview(document.getElementById('inputItemPreview'), trade.input || '');
+        renderItemPreview(document.getElementById('outputItemPreview'), trade.output || '');
+        deleteBtn.style.display = 'none';
     } else {
         title.textContent = '新建交易';
-        if (selectedGroupIndex >= 0) {
-            selectedTradeIndex = -1;
-            renderTrades();
-        }
+        selectedTradeIndex = -1;
         document.getElementById('tradeForm').reset();
         document.getElementById('inputNbt').value = '';
         updateNbtPreview('input', '');
         document.getElementById('outputNbt').value = '';
         updateNbtPreview('output', '');
+        renderItemPreview(document.getElementById('inputItemPreview'), '');
+        renderItemPreview(document.getElementById('outputItemPreview'), '');
         deleteBtn.style.display = 'none';
     }
 
@@ -564,6 +620,11 @@ function editTrade(index) {
 async function saveTrade(e) {
     e.preventDefault();
 
+    if (selectedGroupIndex < 0 || selectedGroupIndex >= groups.length) {
+        alert('请先选择交易分组');
+        return;
+    }
+
     const inputNbtValid = await validateNbt('inputNbt', 'inputNbtError');
     const outputNbtValid = await validateNbt('outputNbt', 'outputNbtError');
 
@@ -571,15 +632,19 @@ async function saveTrade(e) {
         return;
     }
 
+    const inputCount = Math.max(1, Math.min(64, parseInt(document.getElementById('inputCount').value, 10) || 1));
+    const outputCount = Math.max(1, Math.min(64, parseInt(document.getElementById('outputCount').value, 10) || 1));
+    const xpReward = Math.max(0, parseInt(document.getElementById('xpReward').value, 10) || 0);
+
     const trade = {
-        input: document.getElementById('inputItem').value,
-        inputCount: parseInt(document.getElementById('inputCount').value) || 1,
+        input: document.getElementById('inputItem').value.trim(),
+        inputCount,
         inputNbt: document.getElementById('inputNbt').value || null,
-        output: document.getElementById('outputItem').value,
-        outputCount: parseInt(document.getElementById('outputCount').value) || 1,
+        output: document.getElementById('outputItem').value.trim(),
+        outputCount,
         outputNbt: document.getElementById('outputNbt').value || null,
         nbtMatchMode: document.getElementById('nbtMatchMode').value,
-        xpReward: parseInt(document.getElementById('xpReward').value) || 0
+        xpReward
     };
 
     if (!trade.input || !trade.output) {
@@ -619,12 +684,17 @@ async function saveConfig() {
             body: JSON.stringify(groups)
         });
 
-        const data = await res.json();
-        if (data.success) {
-            alert('配置已保存');
-        } else {
-            alert('保存失败: ' + (data.error || '未知错误'));
+        let data = {};
+        try {
+            data = await res.json();
+        } catch (ignored) {}
+
+        if (!res.ok || !data.success) {
+            alert('保存失败: ' + (data.error || `HTTP ${res.status}`));
+            return;
         }
+
+        alert('配置已保存');
     } catch (e) {
         alert('保存失败: ' + e.message);
     }

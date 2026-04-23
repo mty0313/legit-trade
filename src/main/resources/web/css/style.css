@@ -122,12 +122,34 @@ main {
     border-color: #1976d2;
 }
 
+.group-item .group-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
 .group-item .group-name {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: #333;
+}
+
+.group-item .drag-handle {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: grab;
+    padding: 2px 6px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.group-item .drag-handle:active {
+    cursor: grabbing;
 }
 
 .group-item .group-actions {
@@ -139,6 +161,11 @@ main {
 
 .group-item:hover .group-actions {
     opacity: 1;
+}
+
+.group-item.drag-over {
+    border-color: #1976d2;
+    background: #e3f2fd;
 }
 
 .group-item .edit-btn,
@@ -214,6 +241,16 @@ main {
 
 .trade-item .trade-arrow {
     color: #1976d2;
+}
+
+.trade-item .trade-xp {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: #2e7d32;
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
 }
 
 .trade-item .delete-btn {
@@ -350,14 +387,14 @@ form {
 .load-more {
     padding: 12px;
     text-align: center;
-    color: #1976d2;
-    cursor: pointer;
+    color: #666;
+    cursor: default;
     background: #f5f5f5;
     border-top: 1px solid #ddd;
 }
 
 .load-more:hover {
-    background: #e3f2fd;
+    background: #f5f5f5;
 }
 
 .item-preview {
@@ -532,6 +569,18 @@ form {
 .nbt-preview.has-nbt {
     color: #333;
     background: #e8f5e9;
+}
+
+.input-nbt-match-mode {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-nbt-match-mode label {
+    font-size: 13px;
+    color: #666;
 }
 
 /* NBT modal styles */

@@ -63,6 +63,15 @@
                     </div>
                     <input type="hidden" id="inputNbt">
                     <div id="inputNbtError" class="error"></div>
+
+                    <div class="input-nbt-match-mode">
+                        <label for="nbtMatchMode">输入 NBT 匹配模式</label>
+                        <select id="nbtMatchMode">
+                            <option value="exact">精确匹配（必须完全一致）</option>
+                            <option value="contains">包含匹配（输入物品至少包含所填 NBT）</option>
+                            <option value="ignore">忽略输入 NBT</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -88,19 +97,9 @@
                     <div id="outputNbtError" class="error"></div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>NBT 匹配模式</label>
-                        <select id="nbtMatchMode">
-                            <option value="exact">精确匹配</option>
-                            <option value="contains">包含匹配</option>
-                            <option value="ignore">忽略 NBT</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>经验奖励</label>
-                        <input type="number" id="xpReward" min="0" value="0">
-                    </div>
+                <div class="form-group">
+                    <label>经验奖励</label>
+                    <input type="number" id="xpReward" min="0" value="0">
                 </div>
 
                 <div class="form-actions">

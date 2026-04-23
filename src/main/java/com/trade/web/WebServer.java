@@ -18,8 +18,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +29,9 @@ public class WebServer extends NanoHTTPD {
 	private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+	private static final int MAX_REQUEST_BODY_BYTES = 1024 * 1024;
 	private static WebServer instance;
+	private static Runnable configSavedCallback = () -> {};
 
 	public static void start(WebConfig config) {
 		if (instance != null) {
@@ -55,10 +59,15 @@ public class WebServer extends NanoHTTPD {
 			instance = null;
 			LOGGER.info("Web server stopped");
 		}
+		configSavedCallback = () -> {};
 	}
 
 	public static boolean isRunning() {
 		return instance != null;
+	}
+
+	public static void setConfigSavedCallback(Runnable callback) {
+		configSavedCallback = callback != null ? callback : () -> {};
 	}
 
 	public WebServer(String hostname, int port) {
@@ -151,34 +160,61 @@ public class WebServer extends NanoHTTPD {
 
 	private Response handleSaveTrades(IHTTPSession session) {
 		try {
-			// Get content length from headers
 			Map<String, String> headers = session.getHeaders();
 			String contentLengthStr = headers.get("content-length");
-			int contentLength = 0;
-			if (contentLengthStr != null) {
-				contentLength = Integer.parseInt(contentLengthStr);
+			if (contentLengthStr == null) {
+				return json(Response.Status.BAD_REQUEST, "{\"error\":\"Missing content-length\"}");
 			}
 
-			// Read exact number of bytes
-			java.io.InputStream is = session.getInputStream();
+			int contentLength;
+			try {
+				contentLength = Integer.parseInt(contentLengthStr);
+			} catch (NumberFormatException e) {
+				return json(Response.Status.BAD_REQUEST, "{\"error\":\"Invalid content-length\"}");
+			}
+
+			if (contentLength <= 0) {
+				return json(Response.Status.BAD_REQUEST, "{\"error\":\"Empty request body\"}");
+			}
+			if (contentLength > MAX_REQUEST_BODY_BYTES) {
+				return json(Response.Status.BAD_REQUEST, "{\"error\":\"Request body too large\"}");
+			}
+
+			InputStream is = session.getInputStream();
 			byte[] buffer = new byte[contentLength];
 			int bytesRead = 0;
 			while (bytesRead < contentLength) {
 				int read = is.read(buffer, bytesRead, contentLength - bytesRead);
-				if (read == -1) break;
+				if (read == -1) {
+					break;
+				}
 				bytesRead += read;
 			}
+			if (bytesRead != contentLength) {
+				return json(Response.Status.BAD_REQUEST, "{\"error\":\"Incomplete request body\"}");
+			}
 
-			String json = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
+			String jsonBody = new String(buffer, StandardCharsets.UTF_8);
+			List<TradeConfig.TradeGroup> validGroups = TradeConfig.parseTradeGroups(jsonBody);
+			if (validGroups.isEmpty()) {
+				return json(Response.Status.BAD_REQUEST, "{\"error\":\"No valid trades in payload\"}");
+			}
 
 			Path configPath = FabricLoader.getInstance().getConfigDir().resolve("legittrade.json");
-			Files.writeString(configPath, json, StandardCharsets.UTF_8);
-			TradeConfig.load();
+			Path tempPath = configPath.resolveSibling("legittrade.json.tmp");
+			Files.writeString(tempPath, jsonBody, StandardCharsets.UTF_8);
+			try {
+				Files.move(tempPath, configPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			} catch (AtomicMoveNotSupportedException ignored) {
+				Files.move(tempPath, configPath, StandardCopyOption.REPLACE_EXISTING);
+			}
 
-			return json("{\"success\":true}");
+			TradeConfig.setTradeGroups(validGroups);
+			configSavedCallback.run();
+			return json(Response.Status.OK, "{\"success\":true}");
 		} catch (Exception e) {
 			LOGGER.error("Failed to save trades", e);
-			return json("{\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
+			return json(Response.Status.INTERNAL_ERROR, "{\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
 		}
 	}
 
@@ -216,7 +252,11 @@ public class WebServer extends NanoHTTPD {
 	}
 
 	private Response json(String body) {
-		return newFixedLengthResponse(Response.Status.OK, "application/json", body);
+		return json(Response.Status.OK, body);
+	}
+
+	private Response json(Response.Status status, String body) {
+		return newFixedLengthResponse(status, "application/json", body);
 	}
 
 	private String getMimeType(String path) {

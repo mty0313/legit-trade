@@ -360,6 +360,36 @@ public class TradeConfig {
 		return FabricLoader.getInstance().getConfigDir().resolve("legittrade.json");
 	}
 
+	public static List<TradeGroup> parseTradeGroups(String json) {
+		if (json == null || json.isBlank()) {
+			return Collections.emptyList();
+		}
+
+		try {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			JsonElement root = gson.fromJson(json, JsonElement.class);
+			if (root == null || !root.isJsonArray()) {
+				return Collections.emptyList();
+			}
+
+			JsonArray array = root.getAsJsonArray();
+			if (array.isEmpty() || !array.get(0).isJsonObject()) {
+				return Collections.emptyList();
+			}
+
+			JsonObject first = array.get(0).getAsJsonObject();
+			if (first.has("group") || first.has("trades")) {
+				List<RawTradeGroup> rawGroups = gson.fromJson(array, new TypeToken<List<RawTradeGroup>>() {}.getType());
+				return toValidGroups(rawGroups);
+			}
+
+			List<RawTradeEntry> rawList = gson.fromJson(array, new TypeToken<List<RawTradeEntry>>() {}.getType());
+			return toSingleDefaultGroup(toValidTrades(rawList, "Default"));
+		} catch (Exception ignored) {
+			return Collections.emptyList();
+		}
+	}
+
 	public static void load() {
 		Path configPath = getConfigPath();
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -374,22 +404,7 @@ public class TradeConfig {
 			}
 
 			String json = Files.readString(configPath);
-			JsonElement root = gson.fromJson(json, JsonElement.class);
-
-			List<TradeGroup> validGroups = Collections.emptyList();
-			if (root != null && root.isJsonArray()) {
-				JsonArray array = root.getAsJsonArray();
-				if (!array.isEmpty() && array.get(0).isJsonObject()) {
-					JsonObject first = array.get(0).getAsJsonObject();
-					if (first.has("group") || first.has("trades")) {
-						List<RawTradeGroup> rawGroups = gson.fromJson(array, new TypeToken<List<RawTradeGroup>>() {}.getType());
-						validGroups = toValidGroups(rawGroups);
-					} else {
-						List<RawTradeEntry> rawList = gson.fromJson(array, new TypeToken<List<RawTradeEntry>>() {}.getType());
-						validGroups = toSingleDefaultGroup(toValidTrades(rawList, "Default"));
-					}
-				}
-			}
+			List<TradeGroup> validGroups = parseTradeGroups(json);
 
 			if (validGroups.isEmpty()) {
 				LOGGER.warn("No valid trade groups loaded, using defaults");
