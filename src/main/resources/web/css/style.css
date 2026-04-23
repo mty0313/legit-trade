@@ -75,7 +75,7 @@ h2 {
 
 main {
     display: grid;
-    grid-template-columns: 250px 1fr;
+    grid-template-columns: 320px 1fr;
     gap: 20px;
 }
 
@@ -98,6 +98,29 @@ main {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#groupsList.drop-at-start::before,
+#groupsList.drop-at-end::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: #1976d2;
+    pointer-events: none;
+}
+
+#groupsList.drop-at-start::before {
+    top: 0;
+}
+
+#groupsList.drop-at-end::after {
+    bottom: 0;
 }
 
 .group-item {
@@ -110,6 +133,7 @@ main {
     align-items: center;
     border: 1px solid transparent;
     transition: all 0.2s;
+    position: relative;
 }
 
 .group-item:hover {
@@ -164,8 +188,32 @@ main {
 }
 
 .group-item.drag-over {
-    border-color: #1976d2;
-    background: #e3f2fd;
+    border-color: #90caf9;
+    background: #eef7ff;
+}
+
+.group-item.dragging {
+    opacity: 0.55;
+}
+
+.group-item.drop-before::before,
+.group-item.drop-after::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: #1976d2;
+    pointer-events: none;
+}
+
+.group-item.drop-before::before {
+    top: -1px;
+}
+
+.group-item.drop-after::after {
+    bottom: -1px;
 }
 
 .group-item .edit-btn,
@@ -208,6 +256,29 @@ main {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    position: relative;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#tradesList.drop-at-start::before,
+#tradesList.drop-at-end::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: #1976d2;
+    pointer-events: none;
+}
+
+#tradesList.drop-at-start::before {
+    top: 0;
+}
+
+#tradesList.drop-at-end::after {
+    bottom: 0;
 }
 
 .trade-item {
@@ -220,6 +291,7 @@ main {
     align-items: center;
     border: 1px solid transparent;
     transition: all 0.2s;
+    position: relative;
 }
 
 .trade-item:hover {
@@ -232,11 +304,49 @@ main {
     border-color: #1976d2;
 }
 
+.trade-item.drag-over {
+    border-color: #90caf9;
+    background: #eef7ff;
+}
+
+.trade-item.dragging {
+    opacity: 0.55;
+}
+
+.trade-item.drop-before::before,
+.trade-item.drop-after::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: #1976d2;
+    pointer-events: none;
+}
+
+.trade-item.drop-before::before {
+    top: -1px;
+}
+
+.trade-item.drop-after::after {
+    bottom: -1px;
+}
+
+.trade-item .trade-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
 .trade-item .trade-info {
     display: flex;
     align-items: center;
     gap: 12px;
     color: #333;
+    flex-wrap: wrap;
 }
 
 .trade-item .trade-arrow {
@@ -251,6 +361,26 @@ main {
     color: #2e7d32;
     background: #e8f5e9;
     border: 1px solid #c8e6c9;
+}
+
+.trade-item .trade-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trade-item .drag-handle {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: grab;
+    padding: 2px 6px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.trade-item .drag-handle:active {
+    cursor: grabbing;
 }
 
 .trade-item .delete-btn {
@@ -279,6 +409,46 @@ form {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+}
+
+.trade-form-row {
+    align-items: stretch;
+}
+
+.trade-count-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    min-height: 124px;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.trade-form-row-output {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px dashed #e2e2e2;
+}
+
+.trade-count-group label {
+    font-weight: 600;
+}
+
+.trade-count-group input[type="number"] {
+    flex: 1;
+    min-height: 68px;
+    font-size: 34px;
+    font-weight: 700;
+    text-align: center;
+    border-color: #ccc;
+    background: #fff;
+}
+
+.trade-count-group input[type="number"]:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
 .form-group {
@@ -606,10 +776,42 @@ form {
     margin-bottom: 20px;
 }
 
+.nbt-templates-section {
+    margin-bottom: 20px;
+}
+
 .nbt-templates-section h3 {
     font-size: 14px;
     color: #666;
     margin: 16px 0 8px 0;
+}
+
+.nbt-template-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.nbt-template-toolbar label {
+    font-size: 13px;
+    color: #666;
+}
+
+.nbt-template-toolbar select {
+    min-width: 220px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    font-size: 13px;
+}
+
+.nbt-template-toolbar select:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
 .nbt-template-grid {
@@ -633,6 +835,10 @@ form {
     background: #e3f2fd;
     border-color: #1976d2;
     color: #1976d2;
+}
+
+.nbt-editor-content .form-actions {
+    margin-top: 12px;
 }
 
 @media (max-width: 768px) {

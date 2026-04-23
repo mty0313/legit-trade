@@ -5,7 +5,106 @@ let selectedTradeIndex = -1;
 let editingTrade = null;
 let currentNbtTarget = null; // 'input' or 'output'
 let draggingGroupIndex = -1;
+let draggingTradeIndex = -1;
 const DEBUG = false;
+
+const NBT_PRESET_CATEGORIES = [
+    {
+        key: 'armor',
+        label: '装备附魔',
+        presets: [
+            { label: '保护IV', nbt: { Enchantments: [{ id: 'minecraft:protection', lvl: 4 }] } },
+            { label: '爆炸保护IV', nbt: { Enchantments: [{ id: 'minecraft:blast_protection', lvl: 4 }] } },
+            { label: '火焰保护IV', nbt: { Enchantments: [{ id: 'minecraft:fire_protection', lvl: 4 }] } },
+            { label: '弹射物保护IV', nbt: { Enchantments: [{ id: 'minecraft:projectile_protection', lvl: 4 }] } },
+            { label: '荆棘III', nbt: { Enchantments: [{ id: 'minecraft:thorns', lvl: 3 }] } },
+            { label: '摔落缓冲IV', nbt: { Enchantments: [{ id: 'minecraft:feather_falling', lvl: 4 }] } },
+            { label: '水下呼吸III', nbt: { Enchantments: [{ id: 'minecraft:respiration', lvl: 3 }] } },
+            { label: '水下速掘', nbt: { Enchantments: [{ id: 'minecraft:aqua_affinity', lvl: 1 }] } },
+            { label: '深海探索者III', nbt: { Enchantments: [{ id: 'minecraft:depth_strider', lvl: 3 }] } },
+            { label: '冰霜行者II', nbt: { Enchantments: [{ id: 'minecraft:frost_walker', lvl: 2 }] } },
+            { label: '灵魂疾行III', nbt: { Enchantments: [{ id: 'minecraft:soul_speed', lvl: 3 }] } },
+            { label: '迅捷潜行III', nbt: { Enchantments: [{ id: 'minecraft:swift_sneak', lvl: 3 }] } }
+        ]
+    },
+    {
+        key: 'tool',
+        label: '工具附魔',
+        presets: [
+            { label: '效率V', nbt: { Enchantments: [{ id: 'minecraft:efficiency', lvl: 5 }] } },
+            { label: '时运III', nbt: { Enchantments: [{ id: 'minecraft:fortune', lvl: 3 }] } },
+            { label: '精准采集', nbt: { Enchantments: [{ id: 'minecraft:silk_touch', lvl: 1 }] } },
+            { label: '耐久III', nbt: { Enchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } },
+            { label: '经验修补', nbt: { Enchantments: [{ id: 'minecraft:mending', lvl: 1 }] } }
+        ]
+    },
+    {
+        key: 'melee',
+        label: '近战武器附魔',
+        presets: [
+            { label: '锋利V', nbt: { Enchantments: [{ id: 'minecraft:sharpness', lvl: 5 }] } },
+            { label: '亡灵杀手V', nbt: { Enchantments: [{ id: 'minecraft:smite', lvl: 5 }] } },
+            { label: '节肢杀手V', nbt: { Enchantments: [{ id: 'minecraft:bane_of_arthropods', lvl: 5 }] } },
+            { label: '抢夺III', nbt: { Enchantments: [{ id: 'minecraft:looting', lvl: 3 }] } },
+            { label: '火焰附加II', nbt: { Enchantments: [{ id: 'minecraft:fire_aspect', lvl: 2 }] } },
+            { label: '击退II', nbt: { Enchantments: [{ id: 'minecraft:knockback', lvl: 2 }] } },
+            { label: '横扫之刃III', nbt: { Enchantments: [{ id: 'minecraft:sweeping', lvl: 3 }] } }
+        ]
+    },
+    {
+        key: 'ranged',
+        label: '弓弩/三叉戟附魔',
+        presets: [
+            { label: '力量V', nbt: { Enchantments: [{ id: 'minecraft:power', lvl: 5 }] } },
+            { label: '冲击II', nbt: { Enchantments: [{ id: 'minecraft:punch', lvl: 2 }] } },
+            { label: '火矢', nbt: { Enchantments: [{ id: 'minecraft:flame', lvl: 1 }] } },
+            { label: '无限', nbt: { Enchantments: [{ id: 'minecraft:infinity', lvl: 1 }] } },
+            { label: '多重射击', nbt: { Enchantments: [{ id: 'minecraft:multishot', lvl: 1 }] } },
+            { label: '快速装填III', nbt: { Enchantments: [{ id: 'minecraft:quick_charge', lvl: 3 }] } },
+            { label: '穿透IV', nbt: { Enchantments: [{ id: 'minecraft:piercing', lvl: 4 }] } },
+            { label: '忠诚III', nbt: { Enchantments: [{ id: 'minecraft:loyalty', lvl: 3 }] } },
+            { label: '穿刺V', nbt: { Enchantments: [{ id: 'minecraft:impaling', lvl: 5 }] } },
+            { label: '激流III', nbt: { Enchantments: [{ id: 'minecraft:riptide', lvl: 3 }] } },
+            { label: '引雷', nbt: { Enchantments: [{ id: 'minecraft:channeling', lvl: 1 }] } }
+        ]
+    },
+    {
+        key: 'fishing',
+        label: '钓鱼附魔',
+        presets: [
+            { label: '海之眷顾III', nbt: { Enchantments: [{ id: 'minecraft:luck_of_the_sea', lvl: 3 }] } },
+            { label: '饵钓III', nbt: { Enchantments: [{ id: 'minecraft:lure', lvl: 3 }] } },
+            { label: '经验修补', nbt: { Enchantments: [{ id: 'minecraft:mending', lvl: 1 }] } },
+            { label: '耐久III', nbt: { Enchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } }
+        ]
+    },
+    {
+        key: 'curse',
+        label: '诅咒',
+        presets: [
+            { label: '绑定诅咒', nbt: { Enchantments: [{ id: 'minecraft:binding_curse', lvl: 1 }] } },
+            { label: '消失诅咒', nbt: { Enchantments: [{ id: 'minecraft:vanishing_curse', lvl: 1 }] } }
+        ]
+    },
+    {
+        key: 'book',
+        label: '附魔书',
+        presets: [
+            { label: '锋利V', nbt: { StoredEnchantments: [{ id: 'minecraft:sharpness', lvl: 5 }] } },
+            { label: '保护IV', nbt: { StoredEnchantments: [{ id: 'minecraft:protection', lvl: 4 }] } },
+            { label: '经验修补', nbt: { StoredEnchantments: [{ id: 'minecraft:mending', lvl: 1 }] } },
+            { label: '耐久III', nbt: { StoredEnchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } },
+            { label: '时运III', nbt: { StoredEnchantments: [{ id: 'minecraft:fortune', lvl: 3 }] } },
+            { label: '精准采集', nbt: { StoredEnchantments: [{ id: 'minecraft:silk_touch', lvl: 1 }] } },
+            { label: '效率V', nbt: { StoredEnchantments: [{ id: 'minecraft:efficiency', lvl: 5 }] } },
+            { label: '抢夺III', nbt: { StoredEnchantments: [{ id: 'minecraft:looting', lvl: 3 }] } },
+            { label: '海之眷顾III', nbt: { StoredEnchantments: [{ id: 'minecraft:luck_of_the_sea', lvl: 3 }] } },
+            { label: '饵钓III', nbt: { StoredEnchantments: [{ id: 'minecraft:lure', lvl: 3 }] } },
+            { label: '绑定诅咒', nbt: { StoredEnchantments: [{ id: 'minecraft:binding_curse', lvl: 1 }] } },
+            { label: '消失诅咒', nbt: { StoredEnchantments: [{ id: 'minecraft:vanishing_curse', lvl: 1 }] } }
+        ]
+    }
+];
 
 function debugLog(...args) {
     if (DEBUG) {
@@ -115,11 +214,84 @@ function setupEventListeners() {
         document.getElementById('nbtTextarea').value = '';
     });
     document.getElementById('nbtCustomNameBtn').addEventListener('click', () => {
-        document.getElementById('nbtTextarea').value = '{"display":{"Name":"{\\"text\\":\\"请修改名称\\",\\"color\\":\\"gold\\"}"}}';
+        const textarea = document.getElementById('nbtTextarea');
+        appendNbt(textarea, '{"display":{"Name":"{\\"text\\":\\"请修改名称\\",\\"color\\":\\"gold\\"}"}}');
     });
 
-    // NBT template buttons
-    document.querySelectorAll('.nbt-template-grid .nbt-template-btn').forEach(btn => {
+    initNbtPresetSelector();
+}
+
+function dedupeNbtArray(items) {
+    const seen = new Set();
+    return items.filter(item => {
+        const key = (item && typeof item === 'object')
+            ? JSON.stringify(item)
+            : `__primitive:${String(item)}`;
+        if (seen.has(key)) {
+            return false;
+        }
+        seen.add(key);
+        return true;
+    });
+}
+
+function mergeNbtObject(target, source) {
+    Object.entries(source).forEach(([key, value]) => {
+        const current = target[key];
+
+        if (Array.isArray(value)) {
+            if (Array.isArray(current)) {
+                target[key] = dedupeNbtArray(current.concat(value));
+            } else {
+                target[key] = dedupeNbtArray(value);
+            }
+            return;
+        }
+
+        if (value && typeof value === 'object') {
+            if (current && typeof current === 'object' && !Array.isArray(current)) {
+                mergeNbtObject(current, value);
+            } else {
+                target[key] = value;
+            }
+            return;
+        }
+
+        target[key] = value;
+    });
+}
+
+function appendNbt(textarea, newNbtStr) {
+    const currentNbt = textarea.value.trim();
+    if (!currentNbt) {
+        textarea.value = newNbtStr;
+        return;
+    }
+
+    try {
+        const currentObj = JSON.parse(currentNbt);
+        const newObj = JSON.parse(newNbtStr);
+        mergeNbtObject(currentObj, newObj);
+        textarea.value = JSON.stringify(currentObj);
+    } catch (e) {
+        textarea.value = newNbtStr;
+    }
+}
+
+function renderNbtPresetButtons() {
+    const categorySelect = document.getElementById('nbtPresetCategory');
+    const container = document.getElementById('nbtPresetList');
+    if (!categorySelect || !container) {
+        return;
+    }
+
+    const category = NBT_PRESET_CATEGORIES.find(item => item.key === categorySelect.value) || NBT_PRESET_CATEGORIES[0];
+    container.innerHTML = category.presets.map(preset => {
+        const nbtJson = JSON.stringify(preset.nbt);
+        return `<button type="button" class="nbt-template-btn" data-nbt='${escapeHtml(nbtJson)}'>${escapeHtml(preset.label)}</button>`;
+    }).join('');
+
+    container.querySelectorAll('.nbt-template-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const nbt = btn.dataset.nbt;
             const textarea = document.getElementById('nbtTextarea');
@@ -128,41 +300,19 @@ function setupEventListeners() {
     });
 }
 
-function appendNbt(textarea, newNbtStr) {
-    let currentNbt = textarea.value.trim();
-    if (!currentNbt) {
-        textarea.value = newNbtStr;
+function initNbtPresetSelector() {
+    const categorySelect = document.getElementById('nbtPresetCategory');
+    if (!categorySelect) {
         return;
     }
 
-    try {
-        // Parse both NBT strings
-        let currentObj = JSON.parse(currentNbt);
-        let newObj = JSON.parse(newNbtStr);
+    categorySelect.innerHTML = NBT_PRESET_CATEGORIES.map(category => {
+        return `<option value="${escapeHtml(category.key)}">${escapeHtml(category.label)}</option>`;
+    }).join('');
 
-        // Merge enchantments
-        if (newObj.Enchantments && currentObj.Enchantments) {
-            // Append new enchantments to existing
-            currentObj.Enchantments = currentObj.Enchantments.concat(newObj.Enchantments);
-        } else if (newObj.Enchantments) {
-            currentObj.Enchantments = newObj.Enchantments;
-        }
-
-        if (newObj.StoredEnchantments && currentObj.StoredEnchantments) {
-            currentObj.StoredEnchantments = currentObj.StoredEnchantments.concat(newObj.StoredEnchantments);
-        } else if (newObj.StoredEnchantments) {
-            currentObj.StoredEnchantments = newObj.StoredEnchantments;
-        }
-
-        if (newObj.display && !currentObj.display) {
-            currentObj.display = newObj.display;
-        }
-
-        textarea.value = JSON.stringify(currentObj);
-    } catch (e) {
-        // If parsing fails, just replace
-        textarea.value = newNbtStr;
-    }
+    categorySelect.addEventListener('change', renderNbtPresetButtons);
+    categorySelect.value = NBT_PRESET_CATEGORIES[0].key;
+    renderNbtPresetButtons();
 }
 
 function setupItemSearch(inputId, suggestionsId) {
@@ -320,6 +470,42 @@ async function validateNbt(inputId, errorId) {
     }
 }
 
+function clearGroupDropIndicators(container) {
+    container.classList.remove('drop-at-start', 'drop-at-end');
+    container.querySelectorAll('.group-item').forEach(item => {
+        item.classList.remove('drag-over', 'drop-before', 'drop-after');
+    });
+}
+
+function getGroupInsertIndexByPointer(container, clientY) {
+    const groupItems = Array.from(container.querySelectorAll('.group-item'));
+    for (let i = 0; i < groupItems.length; i += 1) {
+        const rect = groupItems[i].getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) {
+            return i;
+        }
+    }
+    return groupItems.length;
+}
+
+function clearTradeDropIndicators(container) {
+    container.classList.remove('drop-at-start', 'drop-at-end');
+    container.querySelectorAll('.trade-item').forEach(item => {
+        item.classList.remove('drag-over', 'drop-before', 'drop-after');
+    });
+}
+
+function getTradeInsertIndexByPointer(container, clientY) {
+    const tradeItems = Array.from(container.querySelectorAll('.trade-item'));
+    for (let i = 0; i < tradeItems.length; i += 1) {
+        const rect = tradeItems[i].getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) {
+            return i;
+        }
+    }
+    return tradeItems.length;
+}
+
 function renderGroups() {
     const container = document.getElementById('groupsList');
     container.innerHTML = groups.map((group, index) => `
@@ -335,8 +521,60 @@ function renderGroups() {
         </div>
     `).join('');
 
+    container.ondragover = (e) => {
+        if (draggingGroupIndex < 0) {
+            return;
+        }
+        if (e.target.closest('.group-item')) {
+            return;
+        }
+
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        clearGroupDropIndicators(container);
+        const insertIndex = getGroupInsertIndexByPointer(container, e.clientY);
+
+        if (insertIndex <= 0) {
+            container.classList.add('drop-at-start');
+            return;
+        }
+
+        if (insertIndex >= groups.length) {
+            container.classList.add('drop-at-end');
+            return;
+        }
+
+        const targetItem = container.querySelector(`.group-item[data-index="${insertIndex}"]`);
+        if (targetItem) {
+            targetItem.classList.add('drag-over', 'drop-before');
+        }
+    };
+
+    container.ondragleave = (e) => {
+        if (container.contains(e.relatedTarget)) {
+            return;
+        }
+        clearGroupDropIndicators(container);
+    };
+
+    container.ondrop = (e) => {
+        if (draggingGroupIndex < 0) {
+            return;
+        }
+        if (e.target.closest('.group-item')) {
+            return;
+        }
+
+        e.preventDefault();
+        const insertIndex = getGroupInsertIndexByPointer(container, e.clientY);
+        moveGroupTo(draggingGroupIndex, insertIndex);
+        draggingGroupIndex = -1;
+        clearGroupDropIndicators(container);
+    };
+
     container.querySelectorAll('.group-item').forEach(el => {
-        const index = parseInt(el.dataset.index);
+        const index = parseInt(el.dataset.index, 10);
         const dragHandle = el.querySelector('.drag-handle');
 
         el.addEventListener('click', (e) => {
@@ -365,11 +603,13 @@ function renderGroups() {
             draggingGroupIndex = index;
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', String(index));
+            el.classList.add('dragging');
         });
 
         dragHandle.addEventListener('dragend', () => {
             draggingGroupIndex = -1;
-            container.querySelectorAll('.group-item').forEach(item => item.classList.remove('drag-over'));
+            clearGroupDropIndicators(container);
+            container.querySelectorAll('.group-item').forEach(item => item.classList.remove('dragging'));
         });
 
         el.addEventListener('dragover', (e) => {
@@ -378,21 +618,36 @@ function renderGroups() {
             }
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            el.classList.add('drag-over');
+
+            const rect = el.getBoundingClientRect();
+            const isAfter = (e.clientY - rect.top) > rect.height / 2;
+
+            clearGroupDropIndicators(container);
+            el.classList.add('drag-over', isAfter ? 'drop-after' : 'drop-before');
         });
 
-        el.addEventListener('dragleave', () => {
-            el.classList.remove('drag-over');
+        el.addEventListener('dragleave', (e) => {
+            if (el.contains(e.relatedTarget)) {
+                return;
+            }
+            el.classList.remove('drag-over', 'drop-before', 'drop-after');
         });
 
         el.addEventListener('drop', (e) => {
             e.preventDefault();
-            el.classList.remove('drag-over');
+            e.stopPropagation();
             if (draggingGroupIndex < 0 || draggingGroupIndex === index) {
+                clearGroupDropIndicators(container);
                 return;
             }
-            moveGroupTo(draggingGroupIndex, index);
+
+            const rect = el.getBoundingClientRect();
+            const isAfter = (e.clientY - rect.top) > rect.height / 2;
+            const insertIndex = isAfter ? index + 1 : index;
+
+            moveGroupTo(draggingGroupIndex, insertIndex);
             draggingGroupIndex = -1;
+            clearGroupDropIndicators(container);
         });
     });
 }
@@ -427,32 +682,143 @@ function renderTrades() {
         const xp = Math.max(0, parseInt(trade.xpReward, 10) || 0);
         return `
         <div class="trade-item ${index === selectedTradeIndex ? 'selected' : ''}" data-index="${index}">
-            <div class="trade-info">
-                <span>${trade.inputCount}× ${escapeHtml(getItemDisplayName(trade.input))}</span>
-                <span class="trade-arrow">→</span>
-                <span>${trade.outputCount}× ${escapeHtml(getItemDisplayName(trade.output))}</span>
-                <span class="trade-xp">XP +${xp}</span>
+            <div class="trade-main">
+                <button class="drag-handle" title="拖拽排序" draggable="true" aria-label="拖拽排序">⋮⋮</button>
+                <div class="trade-info">
+                    <span>${trade.inputCount}× ${escapeHtml(getItemDisplayName(trade.input))}</span>
+                    <span class="trade-arrow">→</span>
+                    <span>${trade.outputCount}× ${escapeHtml(getItemDisplayName(trade.output))}</span>
+                    <span class="trade-xp">XP +${xp}</span>
+                </div>
             </div>
-            <button class="delete-btn" data-action="delete">×</button>
+            <div class="trade-actions">
+                <button class="delete-btn" data-action="delete">×</button>
+            </div>
         </div>
     `;
     }).join('');
 
+    container.ondragover = (e) => {
+        if (draggingTradeIndex < 0) {
+            return;
+        }
+        if (e.target.closest('.trade-item')) {
+            return;
+        }
+
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        clearTradeDropIndicators(container);
+        const insertIndex = getTradeInsertIndexByPointer(container, e.clientY);
+
+        if (insertIndex <= 0) {
+            container.classList.add('drop-at-start');
+            return;
+        }
+
+        if (insertIndex >= group.trades.length) {
+            container.classList.add('drop-at-end');
+            return;
+        }
+
+        const targetItem = container.querySelector(`.trade-item[data-index="${insertIndex}"]`);
+        if (targetItem) {
+            targetItem.classList.add('drag-over', 'drop-before');
+        }
+    };
+
+    container.ondragleave = (e) => {
+        if (container.contains(e.relatedTarget)) {
+            return;
+        }
+        clearTradeDropIndicators(container);
+    };
+
+    container.ondrop = (e) => {
+        if (draggingTradeIndex < 0) {
+            return;
+        }
+        if (e.target.closest('.trade-item')) {
+            return;
+        }
+
+        e.preventDefault();
+        const insertIndex = getTradeInsertIndexByPointer(container, e.clientY);
+        moveTradeTo(draggingTradeIndex, insertIndex);
+        draggingTradeIndex = -1;
+        clearTradeDropIndicators(container);
+    };
+
     container.querySelectorAll('.trade-item').forEach(el => {
+        const index = parseInt(el.dataset.index, 10);
+        const dragHandle = el.querySelector('.drag-handle');
+
         el.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-btn')) return;
-            editTrade(parseInt(el.dataset.index));
+            if (e.target.classList.contains('delete-btn') || e.target.classList.contains('drag-handle')) return;
+            editTrade(parseInt(el.dataset.index, 10));
+        });
+
+        dragHandle.addEventListener('dragstart', (e) => {
+            draggingTradeIndex = index;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(index));
+            el.classList.add('dragging');
+        });
+
+        dragHandle.addEventListener('dragend', () => {
+            draggingTradeIndex = -1;
+            clearTradeDropIndicators(container);
+            container.querySelectorAll('.trade-item').forEach(item => item.classList.remove('dragging'));
+        });
+
+        el.addEventListener('dragover', (e) => {
+            if (draggingTradeIndex < 0 || draggingTradeIndex === index) {
+                return;
+            }
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            const rect = el.getBoundingClientRect();
+            const isAfter = (e.clientY - rect.top) > rect.height / 2;
+
+            clearTradeDropIndicators(container);
+            el.classList.add('drag-over', isAfter ? 'drop-after' : 'drop-before');
+        });
+
+        el.addEventListener('dragleave', (e) => {
+            if (el.contains(e.relatedTarget)) {
+                return;
+            }
+            el.classList.remove('drag-over', 'drop-before', 'drop-after');
+        });
+
+        el.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (draggingTradeIndex < 0 || draggingTradeIndex === index) {
+                clearTradeDropIndicators(container);
+                return;
+            }
+
+            const rect = el.getBoundingClientRect();
+            const isAfter = (e.clientY - rect.top) > rect.height / 2;
+            const insertIndex = isAfter ? index + 1 : index;
+
+            moveTradeTo(draggingTradeIndex, insertIndex);
+            draggingTradeIndex = -1;
+            clearTradeDropIndicators(container);
         });
 
         el.querySelector('.delete-btn').addEventListener('click', () => {
-            const index = parseInt(el.dataset.index);
-            if (!Number.isInteger(index)) {
+            const tradeIndex = parseInt(el.dataset.index, 10);
+            if (!Number.isInteger(tradeIndex)) {
                 return;
             }
             if (!confirm('确认删除这条交易吗？')) {
                 return;
             }
-            deleteTradeFromList(index);
+            deleteTradeFromList(tradeIndex);
         });
     });
 }
@@ -475,23 +841,59 @@ function addGroup() {
     renderTrades();
 }
 
-function moveGroupTo(fromIndex, toIndex) {
-    if (fromIndex < 0 || fromIndex >= groups.length || toIndex < 0 || toIndex >= groups.length || fromIndex === toIndex) {
+function moveGroupTo(fromIndex, insertIndex) {
+    if (fromIndex < 0 || fromIndex >= groups.length || insertIndex < 0 || insertIndex > groups.length) {
         return;
     }
 
-    const [moved] = groups.splice(fromIndex, 1);
-    groups.splice(toIndex, 0, moved);
+    if (insertIndex === fromIndex || insertIndex === fromIndex + 1) {
+        return;
+    }
 
-    if (selectedGroupIndex === fromIndex) {
-        selectedGroupIndex = toIndex;
-    } else if (fromIndex < toIndex && selectedGroupIndex > fromIndex && selectedGroupIndex <= toIndex) {
-        selectedGroupIndex -= 1;
-    } else if (fromIndex > toIndex && selectedGroupIndex >= toIndex && selectedGroupIndex < fromIndex) {
-        selectedGroupIndex += 1;
+    const selectedGroup = selectedGroupIndex >= 0 ? groups[selectedGroupIndex] : null;
+    const [moved] = groups.splice(fromIndex, 1);
+
+    if (fromIndex < insertIndex) {
+        insertIndex -= 1;
+    }
+
+    groups.splice(insertIndex, 0, moved);
+
+    if (selectedGroup) {
+        selectedGroupIndex = groups.indexOf(selectedGroup);
     }
 
     renderGroups();
+    renderTrades();
+}
+
+function moveTradeTo(fromIndex, insertIndex) {
+    if (selectedGroupIndex < 0 || selectedGroupIndex >= groups.length) {
+        return;
+    }
+
+    const trades = groups[selectedGroupIndex].trades;
+    if (!Array.isArray(trades) || fromIndex < 0 || fromIndex >= trades.length || insertIndex < 0 || insertIndex > trades.length) {
+        return;
+    }
+
+    if (insertIndex === fromIndex || insertIndex === fromIndex + 1) {
+        return;
+    }
+
+    const selectedTrade = selectedTradeIndex >= 0 ? trades[selectedTradeIndex] : null;
+    const [moved] = trades.splice(fromIndex, 1);
+
+    if (fromIndex < insertIndex) {
+        insertIndex -= 1;
+    }
+
+    trades.splice(insertIndex, 0, moved);
+
+    if (selectedTrade) {
+        selectedTradeIndex = trades.indexOf(selectedTrade);
+    }
+
     renderTrades();
 }
 

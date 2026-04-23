@@ -42,14 +42,14 @@
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <form id="tradeForm">
-                <div class="form-row">
+                <div class="form-row trade-form-row">
                     <div class="form-group">
                         <label>输入物品</label>
                         <input type="text" id="inputItem" placeholder="点击选择或搜索物品..." autocomplete="off">
                         <div id="inputItemSuggestions" class="suggestions"></div>
                         <div id="inputItemPreview" class="item-preview"></div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group trade-count-group">
                         <label>输入数量</label>
                         <input type="number" id="inputCount" min="1" max="64" value="1">
                     </div>
@@ -74,14 +74,14 @@
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row trade-form-row trade-form-row-output">
                     <div class="form-group">
                         <label>输出物品</label>
                         <input type="text" id="outputItem" placeholder="点击选择或搜索物品..." autocomplete="off">
                         <div id="outputItemSuggestions" class="suggestions"></div>
                         <div id="outputItemPreview" class="item-preview"></div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group trade-count-group">
                         <label>输出数量</label>
                         <input type="number" id="outputCount" min="1" max="64" value="1">
                     </div>
@@ -131,56 +131,12 @@
                 </div>
 
                 <div class="nbt-templates-section">
-                    <h3>装备附魔</h3>
-                    <div class="nbt-template-grid">
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:sharpness","lvl":5}]}'>锋利V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:smite","lvl":5}]}'>亡灵杀手V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:bane_of_arthropods","lvl":5}]}'>节肢杀手V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:protection","lvl":4}]}'>保护IV</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:blast_protection","lvl":4}]}'>爆炸保护IV</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:fire_protection","lvl":4}]}'>火焰保护IV</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:projectile_protection","lvl":4}]}'>弹射物保护IV</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:feather_falling","lvl":4}]}'>摔落缓冲IV</button>
+                    <h3>NBT 预设</h3>
+                    <div class="nbt-template-toolbar">
+                        <label for="nbtPresetCategory">分类</label>
+                        <select id="nbtPresetCategory"></select>
                     </div>
-
-                    <h3>工具附魔</h3>
-                    <div class="nbt-template-grid">
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:efficiency","lvl":5}]}'>效率V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:fortune","lvl":3}]}'>时运III</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:silk_touch","lvl":1}]}'>精准采集</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:unbreaking","lvl":3}]}'>耐久III</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:mending","lvl":1}]}'>经验修补</button>
-                    </div>
-
-                    <h3>武器附魔</h3>
-                    <div class="nbt-template-grid">
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:looting","lvl":3}]}'>抢夺III</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:fire_aspect","lvl":2}]}'>火焰附加II</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:knockback","lvl":2}]}'>击退II</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:sweeping","lvl":3}]}'>横扫之刃III</button>
-                    </div>
-
-                    <h3>弓/弩附魔</h3>
-                    <div class="nbt-template-grid">
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:power","lvl":5}]}'>力量V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:punch","lvl":2}]}'>冲击II</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:flame","lvl":1}]}'>火矢</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:infinity","lvl":1}]}'>无限</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:multishot","lvl":1}]}'>多重射击</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"Enchantments":[{"id":"minecraft:quick_charge","lvl":3}]}'>快速装填III</button>
-                    </div>
-
-                    <h3>附魔书</h3>
-                    <div class="nbt-template-grid">
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:sharpness","lvl":5}]}'>锋利V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:protection","lvl":4}]}'>保护IV</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:mending","lvl":1}]}'>经验修补</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:unbreaking","lvl":3}]}'>耐久III</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:fortune","lvl":3}]}'>时运III</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:silk_touch","lvl":1}]}'>精准采集</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:efficiency","lvl":5}]}'>效率V</button>
-                        <button type="button" class="nbt-template-btn" data-nbt='{"StoredEnchantments":[{"id":"minecraft:looting","lvl":3}]}'>抢夺III</button>
-                    </div>
+                    <div id="nbtPresetList" class="nbt-template-grid"></div>
                 </div>
 
                 <div class="form-actions">
