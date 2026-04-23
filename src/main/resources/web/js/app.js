@@ -12,6 +12,14 @@ const DEBUG = false;
 
 const NBT_PRESET_CATEGORIES = [
     {
+        key: 'common',
+        label: '通用高频',
+        presets: [
+            { label: '耐久III', nbt: { Enchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } },
+            { label: '经验修补', nbt: { Enchantments: [{ id: 'minecraft:mending', lvl: 1 }] } }
+        ]
+    },
+    {
         key: 'armor',
         label: '装备附魔',
         presets: [
@@ -31,13 +39,13 @@ const NBT_PRESET_CATEGORIES = [
     },
     {
         key: 'tool',
-        label: '工具附魔',
+        label: '工具/钓鱼附魔',
         presets: [
             { label: '效率V', nbt: { Enchantments: [{ id: 'minecraft:efficiency', lvl: 5 }] } },
             { label: '时运III', nbt: { Enchantments: [{ id: 'minecraft:fortune', lvl: 3 }] } },
             { label: '精准采集', nbt: { Enchantments: [{ id: 'minecraft:silk_touch', lvl: 1 }] } },
-            { label: '耐久III', nbt: { Enchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } },
-            { label: '经验修补', nbt: { Enchantments: [{ id: 'minecraft:mending', lvl: 1 }] } }
+            { label: '海之眷顾III', nbt: { Enchantments: [{ id: 'minecraft:luck_of_the_sea', lvl: 3 }] } },
+            { label: '饵钓III', nbt: { Enchantments: [{ id: 'minecraft:lure', lvl: 3 }] } }
         ]
     },
     {
@@ -71,37 +79,9 @@ const NBT_PRESET_CATEGORIES = [
         ]
     },
     {
-        key: 'fishing',
-        label: '钓鱼附魔',
-        presets: [
-            { label: '海之眷顾III', nbt: { Enchantments: [{ id: 'minecraft:luck_of_the_sea', lvl: 3 }] } },
-            { label: '饵钓III', nbt: { Enchantments: [{ id: 'minecraft:lure', lvl: 3 }] } },
-            { label: '经验修补', nbt: { Enchantments: [{ id: 'minecraft:mending', lvl: 1 }] } },
-            { label: '耐久III', nbt: { Enchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } }
-        ]
-    },
-    {
-        key: 'curse',
-        label: '诅咒',
-        presets: [
-            { label: '绑定诅咒', nbt: { Enchantments: [{ id: 'minecraft:binding_curse', lvl: 1 }] } },
-            { label: '消失诅咒', nbt: { Enchantments: [{ id: 'minecraft:vanishing_curse', lvl: 1 }] } }
-        ]
-    },
-    {
         key: 'book',
-        label: '附魔书',
+        label: '附魔书补充',
         presets: [
-            { label: '锋利V', nbt: { StoredEnchantments: [{ id: 'minecraft:sharpness', lvl: 5 }] } },
-            { label: '保护IV', nbt: { StoredEnchantments: [{ id: 'minecraft:protection', lvl: 4 }] } },
-            { label: '经验修补', nbt: { StoredEnchantments: [{ id: 'minecraft:mending', lvl: 1 }] } },
-            { label: '耐久III', nbt: { StoredEnchantments: [{ id: 'minecraft:unbreaking', lvl: 3 }] } },
-            { label: '时运III', nbt: { StoredEnchantments: [{ id: 'minecraft:fortune', lvl: 3 }] } },
-            { label: '精准采集', nbt: { StoredEnchantments: [{ id: 'minecraft:silk_touch', lvl: 1 }] } },
-            { label: '效率V', nbt: { StoredEnchantments: [{ id: 'minecraft:efficiency', lvl: 5 }] } },
-            { label: '抢夺III', nbt: { StoredEnchantments: [{ id: 'minecraft:looting', lvl: 3 }] } },
-            { label: '海之眷顾III', nbt: { StoredEnchantments: [{ id: 'minecraft:luck_of_the_sea', lvl: 3 }] } },
-            { label: '饵钓III', nbt: { StoredEnchantments: [{ id: 'minecraft:lure', lvl: 3 }] } },
             { label: '绑定诅咒', nbt: { StoredEnchantments: [{ id: 'minecraft:binding_curse', lvl: 1 }] } },
             { label: '消失诅咒', nbt: { StoredEnchantments: [{ id: 'minecraft:vanishing_curse', lvl: 1 }] } }
         ]
@@ -222,6 +202,26 @@ function setupEventListeners() {
     document.getElementById('saveBtn').addEventListener('click', saveConfig);
     document.getElementById('addGroupBtn').addEventListener('click', addGroup);
     document.getElementById('addTradeBtn').addEventListener('click', () => showModal(null));
+
+    document.querySelectorAll('.count-adjust-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            const step = parseInt(btn.dataset.step, 10) || 0;
+            const input = document.getElementById(targetId);
+            if (!input || step === 0) {
+                return;
+            }
+
+            const min = parseInt(input.min, 10) || 1;
+            const max = parseInt(input.max, 10) || 64;
+            const current = parseInt(input.value, 10) || min;
+            const next = Math.max(min, Math.min(max, current + step));
+            input.value = String(next);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.focus();
+        });
+    });
     document.getElementById('closeModal').addEventListener('click', hideModal);
     document.getElementById('cancelBtn').addEventListener('click', hideModal);
     document.getElementById('modalOverlay').addEventListener('click', (e) => {
@@ -723,14 +723,16 @@ function renderTrades() {
 
     container.innerHTML = group.trades.map((trade, index) => {
         const xp = Math.max(0, parseInt(trade.xpReward, 10) || 0);
+        const hasInputNbt = Boolean(trade.inputNbt && String(trade.inputNbt).trim());
+        const hasOutputNbt = Boolean(trade.outputNbt && String(trade.outputNbt).trim());
         return `
         <div class="trade-item ${index === selectedTradeIndex ? 'selected' : ''}" data-index="${index}">
             <div class="trade-main">
                 <button class="drag-handle" title="拖拽排序" draggable="true" aria-label="拖拽排序">⋮⋮</button>
                 <div class="trade-info">
-                    <span>${trade.inputCount}× ${escapeHtml(getItemDisplayName(trade.input))}</span>
+                    <span class="trade-io">${trade.inputCount}× ${escapeHtml(getItemDisplayName(trade.input))}${hasInputNbt ? ' <span class="trade-nbt-tag">NBT</span>' : ''}</span>
                     <span class="trade-arrow">→</span>
-                    <span>${trade.outputCount}× ${escapeHtml(getItemDisplayName(trade.output))}</span>
+                    <span class="trade-io">${trade.outputCount}× ${escapeHtml(getItemDisplayName(trade.output))}${hasOutputNbt ? ' <span class="trade-nbt-tag">NBT</span>' : ''}</span>
                     <span class="trade-xp">XP +${xp}</span>
                 </div>
             </div>

@@ -366,6 +366,24 @@ main {
     flex-wrap: wrap;
 }
 
+.trade-item .trade-io {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.trade-item .trade-nbt-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    color: #5f4b00;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+}
+
 .trade-item .trade-arrow {
     color: #1976d2;
 }
@@ -453,6 +471,33 @@ form {
     font-weight: 600;
 }
 
+.trade-count-group .count-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.trade-count-group .count-adjust-btn {
+    width: 52px;
+    min-width: 52px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f5f5f5;
+    color: #333;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.trade-count-group .count-adjust-btn:hover {
+    background: #e9f2ff;
+    border-color: #90caf9;
+    color: #1565c0;
+}
+
 .trade-count-group input[type="number"] {
     flex: 1;
     min-height: 68px;
@@ -461,6 +506,13 @@ form {
     text-align: center;
     border-color: #ccc;
     background: #fff;
+    -moz-appearance: textfield;
+}
+
+.trade-count-group input[type="number"]::-webkit-outer-spin-button,
+.trade-count-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .trade-count-group input[type="number"]:focus {
@@ -510,7 +562,7 @@ form {
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 4px;
-    max-height: 300px;
+    max-height: min(320px, 48vh);
     overflow-y: auto;
     z-index: 100;
     display: none;
@@ -687,8 +739,8 @@ form {
     background: #fff;
     border-radius: 8px;
     width: 90%;
-    max-width: 700px;
-    max-height: 90vh;
+    max-width: 760px;
+    max-height: 96vh;
     overflow-y: auto;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
