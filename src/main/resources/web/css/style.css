@@ -903,6 +903,18 @@ form {
     color: #1976d2;
 }
 
+.nbt-template-grid .nbt-preset-active {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.nbt-template-grid .nbt-preset-active:hover {
+    background: #c8e6c9;
+    border-color: #388e3c;
+}
+
 .nbt-editor-content .form-actions {
     margin-top: 12px;
 }

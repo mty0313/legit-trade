@@ -320,7 +320,49 @@ function appendNbt(textarea, newNbtStr) {
     }
 }
 
-function renderNbtPresetButtons() {
+// Check if preset NBT is contained in current NBT (deep check)
+function isNbtContained(currentNbt, presetNbt) {
+    if (!currentNbt || !presetNbt) return false;
+
+    for (const [key, presetValue] of Object.entries(presetNbt)) {
+        if (!(key in currentNbt)) return false;
+
+        const currentValue = currentNbt[key];
+
+        if (Array.isArray(presetValue)) {
+            if (!Array.isArray(currentValue)) return false;
+            // Check each preset item exists in current array
+            for (const presetItem of presetValue) {
+                const found = currentValue.some(item => deepEqual(item, presetItem));
+                if (!found) return false;
+            }
+        } else if (typeof presetValue === 'object' && presetValue !== null) {
+            if (typeof currentValue !== 'object' || Array.isArray(currentValue)) return false;
+            if (!isNbtContained(currentValue, presetValue)) return false;
+        } else {
+            if (currentValue !== presetValue) return false;
+        }
+    }
+    return true;
+}
+
+function deepEqual(a, b) {
+    if (a === b) return true;
+    if (typeof a !== typeof b) return false;
+    if (typeof a !== 'object' || a === null || b === null) return false;
+
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) return false;
+
+    for (const key of keysA) {
+        if (!(key in b)) return false;
+        if (!deepEqual(a[key], b[key])) return false;
+    }
+    return true;
+}
+
+function renderNbtPresetButtons(currentNbtObj) {
     const categorySelect = document.getElementById('nbtPresetCategory');
     const container = document.getElementById('nbtPresetList');
     if (!categorySelect || !container) {
@@ -330,7 +372,9 @@ function renderNbtPresetButtons() {
     const category = NBT_PRESET_CATEGORIES.find(item => item.key === categorySelect.value) || NBT_PRESET_CATEGORIES[0];
     container.innerHTML = category.presets.map(preset => {
         const nbtJson = JSON.stringify(preset.nbt);
-        return `<button type="button" class="nbt-template-btn" data-nbt='${escapeHtml(nbtJson)}'>${escapeHtml(preset.label)}</button>`;
+        const isContained = currentNbtObj ? isNbtContained(currentNbtObj, preset.nbt) : false;
+        const highlightClass = isContained ? ' nbt-preset-active' : '';
+        return `<button type="button" class="nbt-template-btn${highlightClass}" data-nbt='${escapeHtml(nbtJson)}'>${escapeHtml(preset.label)}</button>`;
     }).join('');
 
     container.querySelectorAll('.nbt-template-btn').forEach(btn => {
@@ -338,6 +382,13 @@ function renderNbtPresetButtons() {
             const nbt = btn.dataset.nbt;
             const textarea = document.getElementById('nbtTextarea');
             appendNbt(textarea, nbt);
+            // Re-highlight after adding
+            try {
+                const updatedObj = JSON.parse(textarea.value);
+                renderNbtPresetButtons(updatedObj);
+            } catch (e) {
+                // ignore
+            }
         });
     });
 }
@@ -352,9 +403,22 @@ function initNbtPresetSelector() {
         return `<option value="${escapeHtml(category.key)}">${escapeHtml(category.label)}</option>`;
     }).join('');
 
-    categorySelect.addEventListener('change', renderNbtPresetButtons);
+    categorySelect.addEventListener('change', () => {
+        // Re-render with current textarea content
+        const textarea = document.getElementById('nbtTextarea');
+        let currentNbtObj = null;
+        try {
+            const nbtStr = textarea.value.trim();
+            if (nbtStr) {
+                currentNbtObj = JSON.parse(nbtStr);
+            }
+        } catch (e) {
+            // ignore
+        }
+        renderNbtPresetButtons(currentNbtObj);
+    });
     categorySelect.value = NBT_PRESET_CATEGORIES[0].key;
-    renderNbtPresetButtons();
+    renderNbtPresetButtons(null);
 }
 
 function setupItemSearch(inputId, suggestionsId) {
@@ -1021,6 +1085,18 @@ function showNbtModal(target) {
     title.textContent = target === 'input' ? '编辑输入 NBT' : '编辑输出 NBT';
     textarea.value = document.getElementById(target + 'Nbt').value || '';
     document.getElementById('nbtTextareaError').textContent = '';
+
+    // Parse current NBT and highlight presets
+    let currentNbtObj = null;
+    try {
+        const nbtStr = textarea.value.trim();
+        if (nbtStr) {
+            currentNbtObj = JSON.parse(nbtStr);
+        }
+    } catch (e) {
+        // ignore parse error
+    }
+    renderNbtPresetButtons(currentNbtObj);
 
     overlay.classList.add('show');
 }
