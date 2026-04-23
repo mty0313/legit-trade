@@ -6,6 +6,8 @@ let editingTrade = null;
 let currentNbtTarget = null; // 'input' or 'output'
 let draggingGroupIndex = -1;
 let draggingTradeIndex = -1;
+let hasUnsavedChanges = false;
+let lastSavedGroupsSnapshot = '[]';
 const DEBUG = false;
 
 const NBT_PRESET_CATEGORIES = [
@@ -121,6 +123,36 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function getGroupsSnapshot() {
+    return JSON.stringify(groups);
+}
+
+function updateSaveStatus() {
+    const statusEl = document.getElementById('saveStatus');
+    if (!statusEl) {
+        return;
+    }
+
+    if (hasUnsavedChanges) {
+        statusEl.textContent = '配置有更改（未保存）';
+        statusEl.classList.add('dirty');
+    } else {
+        statusEl.textContent = '';
+        statusEl.classList.remove('dirty');
+    }
+}
+
+function refreshUnsavedChangesState() {
+    hasUnsavedChanges = getGroupsSnapshot() !== lastSavedGroupsSnapshot;
+    updateSaveStatus();
+}
+
+function markSavedSnapshot() {
+    lastSavedGroupsSnapshot = getGroupsSnapshot();
+    hasUnsavedChanges = false;
+    updateSaveStatus();
+}
+
 function renderItemPreview(preview, itemId) {
     const cleanId = (itemId || '').trim();
     const item = cleanId ? items.find(i => i.id === cleanId) : null;
@@ -179,6 +211,8 @@ async function loadTrades() {
         const res = await fetch('/api/trades');
         groups = await res.json();
         renderGroups();
+        renderTrades();
+        markSavedSnapshot();
     } catch (e) {
         console.error('Failed to load trades:', e);
     }
@@ -219,6 +253,14 @@ function setupEventListeners() {
     });
 
     initNbtPresetSelector();
+
+    window.addEventListener('beforeunload', (e) => {
+        if (!hasUnsavedChanges) {
+            return;
+        }
+        e.preventDefault();
+        e.returnValue = '还有未保存的提交';
+    });
 }
 
 function dedupeNbtArray(items) {
@@ -593,6 +635,7 @@ function renderGroups() {
                     if (selectedGroupIndex === index) {
                         document.getElementById('currentGroupName').textContent = newName.trim();
                     }
+                    refreshUnsavedChangesState();
                 }
                 return;
             }
@@ -839,6 +882,7 @@ function addGroup() {
     selectedGroupIndex = groups.length - 1;
     renderGroups();
     renderTrades();
+    refreshUnsavedChangesState();
 }
 
 function moveGroupTo(fromIndex, insertIndex) {
@@ -865,6 +909,7 @@ function moveGroupTo(fromIndex, insertIndex) {
 
     renderGroups();
     renderTrades();
+    refreshUnsavedChangesState();
 }
 
 function moveTradeTo(fromIndex, insertIndex) {
@@ -895,6 +940,7 @@ function moveTradeTo(fromIndex, insertIndex) {
     }
 
     renderTrades();
+    refreshUnsavedChangesState();
 }
 
 function deleteGroup(index) {
@@ -908,6 +954,7 @@ function deleteGroup(index) {
     }
     renderGroups();
     renderTrades();
+    refreshUnsavedChangesState();
 }
 
 function showModal(trade) {
@@ -1062,6 +1109,7 @@ async function saveTrade(e) {
 
     renderTrades();
     hideModal();
+    refreshUnsavedChangesState();
 }
 
 function deleteTrade() {
@@ -1076,6 +1124,7 @@ function deleteTradeFromList(index) {
         selectedTradeIndex = -1;
     }
     renderTrades();
+    refreshUnsavedChangesState();
 }
 
 async function saveConfig() {
@@ -1096,6 +1145,7 @@ async function saveConfig() {
             return;
         }
 
+        markSavedSnapshot();
         alert('配置已保存');
     } catch (e) {
         alert('保存失败: ' + e.message);
