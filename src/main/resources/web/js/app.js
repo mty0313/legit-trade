@@ -409,7 +409,7 @@ function setupItemSearch(inputId, suggestionsId) {
         `).join('');
 
         if (hasMore) {
-            suggestions.innerHTML += `<div class="load-more" tabindex="-1" aria-hidden="true">已展示前${MAX_DISPLAY}项，请缩小关键词继续搜索（共${filtered.length}项）</div>`;
+            suggestions.innerHTML += `<div class="load-more" tabindex="-1" aria-hidden="true">已展示前${MAX_DISPLAY}项（共${filtered.length}项）</div>`;
         }
 
         suggestions.classList.add('show');
