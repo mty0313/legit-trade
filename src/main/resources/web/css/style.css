@@ -915,6 +915,21 @@ form {
     border-color: #388e3c;
 }
 
+.nbt-preset-remove {
+    margin-left: 6px;
+    padding: 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #c62828;
+    cursor: pointer;
+    border-radius: 3px;
+    line-height: 1;
+}
+
+.nbt-preset-remove:hover {
+    background: #ffcdd2;
+}
+
 .nbt-editor-content .form-actions {
     margin-top: 12px;
 }

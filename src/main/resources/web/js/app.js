@@ -320,6 +320,56 @@ function appendNbt(textarea, newNbtStr) {
     }
 }
 
+function removeNbt(textarea, removeNbtStr) {
+    const currentNbt = textarea.value.trim();
+    if (!currentNbt) return;
+
+    try {
+        const currentObj = JSON.parse(currentNbt);
+        const removeObj = JSON.parse(removeNbtStr);
+        removeFromNbt(currentObj, removeObj);
+        // If empty object, clear textarea
+        if (Object.keys(currentObj).length === 0) {
+            textarea.value = '';
+        } else {
+            textarea.value = JSON.stringify(currentObj);
+        }
+    } catch (e) {
+        // ignore
+    }
+}
+
+function removeFromNbt(current, toRemove) {
+    for (const [key, removeValue] of Object.entries(toRemove)) {
+        if (!(key in current)) continue;
+
+        const currentValue = current[key];
+
+        if (Array.isArray(removeValue) && Array.isArray(currentValue)) {
+            // Remove items that match
+            current[key] = currentValue.filter(item =>
+                !removeValue.some(removeItem => deepEqual(item, removeItem))
+            );
+            // Remove empty array
+            if (current[key].length === 0) {
+                delete current[key];
+            }
+        } else if (typeof removeValue === 'object' && removeValue !== null &&
+                   typeof currentValue === 'object' && !Array.isArray(currentValue)) {
+            removeFromNbt(currentValue, removeValue);
+            // Remove empty object
+            if (Object.keys(currentValue).length === 0) {
+                delete current[key];
+            }
+        } else {
+            // Primitive value - remove if matches
+            if (currentValue === removeValue) {
+                delete current[key];
+            }
+        }
+    }
+}
+
 // Check if preset NBT is contained in current NBT (deep check)
 function isNbtContained(currentNbt, presetNbt) {
     if (!currentNbt || !presetNbt) return false;
@@ -374,11 +424,27 @@ function renderNbtPresetButtons(currentNbtObj) {
         const nbtJson = JSON.stringify(preset.nbt);
         const isContained = currentNbtObj ? isNbtContained(currentNbtObj, preset.nbt) : false;
         const highlightClass = isContained ? ' nbt-preset-active' : '';
-        return `<button type="button" class="nbt-template-btn${highlightClass}" data-nbt='${escapeHtml(nbtJson)}'>${escapeHtml(preset.label)}</button>`;
+        const deleteBtn = isContained ? '<span class="nbt-preset-remove" title="移除">×</span>' : '';
+        return `<button type="button" class="nbt-template-btn${highlightClass}" data-nbt='${escapeHtml(nbtJson)}'>${escapeHtml(preset.label)}${deleteBtn}</button>`;
     }).join('');
 
     container.querySelectorAll('.nbt-template-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            // If clicking remove button, remove instead of add
+            if (e.target.classList.contains('nbt-preset-remove')) {
+                e.stopPropagation();
+                const nbt = btn.dataset.nbt;
+                const textarea = document.getElementById('nbtTextarea');
+                removeNbt(textarea, nbt);
+                try {
+                    const updatedObj = JSON.parse(textarea.value);
+                    renderNbtPresetButtons(updatedObj);
+                } catch (err) {
+                    renderNbtPresetButtons(null);
+                }
+                return;
+            }
+
             const nbt = btn.dataset.nbt;
             const textarea = document.getElementById('nbtTextarea');
             appendNbt(textarea, nbt);
