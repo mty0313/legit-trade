@@ -2,6 +2,8 @@ package com.trade;
 
 import com.trade.network.ConfigSyncPacket;
 import com.trade.network.TradePackets;
+import com.trade.web.WebConfig;
+import com.trade.web.WebServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -17,7 +19,18 @@ public class LegitTrade implements ModInitializer {
         TradeBlocks.register();
         TradePackets.register();
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> TradeConfig.load());
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            TradeConfig.load();
+            WebConfig webConfig = WebConfig.load();
+            WebServer.start(webConfig);
+            WebServer.setConfigSavedCallback(() -> server.execute(() -> {
+                for (net.minecraft.server.network.ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                    ConfigSyncPacket.sendToClient(player);
+                }
+            }));
+        });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> WebServer.stopServer());
 
         // Sync config when player joins
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {

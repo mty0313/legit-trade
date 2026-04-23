@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegitTrade 配置</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LegitTrade 配置</h1>
+            <div class="header-actions">
+                <span id="saveStatus" class="save-status" aria-live="polite"></span>
+                <button id="saveBtn" class="btn primary">保存配置</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="groups-panel">
+                <div class="panel-header">
+                    <h2>交易分组</h2>
+                    <button id="addGroupBtn" class="btn">+ 新建分组</button>
+                </div>
+                <div id="groupsList"></div>
+            </div>
+
+            <div class="trades-panel" id="tradesPanel" style="display:none;">
+                <div class="panel-header">
+                    <h2 id="currentGroupName">交易列表</h2>
+                    <button id="addTradeBtn" class="btn">+ 新建交易</button>
+                </div>
+                <div id="tradesList">
+                    <div class="hint">点击左侧分组查看交易</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for editing/adding trades -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="editModal">
+            <div class="modal-header">
+                <h2 id="modalTitle">新建交易</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <form id="tradeForm">
+                <div class="form-row trade-form-row">
+                    <div class="form-group">
+                        <label>输入物品</label>
+                        <input type="text" id="inputItem" placeholder="点击选择或搜索物品..." autocomplete="off">
+                        <div id="inputItemSuggestions" class="suggestions"></div>
+                        <div id="inputItemPreview" class="item-preview"></div>
+                    </div>
+                    <div class="form-group trade-count-group">
+                        <label>输入数量</label>
+                        <div class="count-input-wrap">
+                            <button type="button" class="count-adjust-btn" data-target="inputCount" data-step="-1" aria-label="减少输入数量">−</button>
+                            <input type="number" id="inputCount" min="1" max="64" value="1">
+                            <button type="button" class="count-adjust-btn" data-target="inputCount" data-step="1" aria-label="增加输入数量">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>输入 NBT (可选)</label>
+                    <div class="nbt-field">
+                        <div id="inputNbtPreview" class="nbt-preview">未设置</div>
+                        <button type="button" class="btn" id="inputNbtBtn">编辑 NBT</button>
+                    </div>
+                    <input type="hidden" id="inputNbt">
+                    <div id="inputNbtError" class="error"></div>
+
+                    <div class="input-nbt-match-mode">
+                        <label for="nbtMatchMode">输入 NBT 匹配模式</label>
+                        <select id="nbtMatchMode">
+                            <option value="exact">精确匹配（必须完全一致）</option>
+                            <option value="contains">包含匹配（输入物品至少包含所填 NBT）</option>
+                            <option value="ignore">忽略输入 NBT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row trade-form-row trade-form-row-output">
+                    <div class="form-group">
+                        <label>输出物品</label>
+                        <input type="text" id="outputItem" placeholder="点击选择或搜索物品..." autocomplete="off">
+                        <div id="outputItemSuggestions" class="suggestions"></div>
+                        <div id="outputItemPreview" class="item-preview"></div>
+                    </div>
+                    <div class="form-group trade-count-group">
+                        <label>输出数量</label>
+                        <div class="count-input-wrap">
+                            <button type="button" class="count-adjust-btn" data-target="outputCount" data-step="-1" aria-label="减少输出数量">−</button>
+                            <input type="number" id="outputCount" min="1" max="64" value="1">
+                            <button type="button" class="count-adjust-btn" data-target="outputCount" data-step="1" aria-label="增加输出数量">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>输出 NBT (可选)</label>
+                    <div class="nbt-field">
+                        <div id="outputNbtPreview" class="nbt-preview">未设置</div>
+                        <button type="button" class="btn" id="outputNbtBtn">编辑 NBT</button>
+                    </div>
+                    <input type="hidden" id="outputNbt">
+                    <div id="outputNbtError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>经验奖励</label>
+                    <input type="number" id="xpReward" min="0" value="0">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn" id="cancelBtn">取消</button>
+                    <button type="submit" class="btn primary">保存交易</button>
+                    <button type="button" id="deleteTradeBtn" class="btn danger" style="display:none;">删除交易</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for NBT editor -->
+    <div class="modal-overlay" id="nbtModalOverlay">
+        <div class="modal nbt-modal" id="nbtModal">
+            <div class="modal-header">
+                <h2 id="nbtModalTitle">编辑 NBT</h2>
+                <button class="modal-close" id="closeNbtModal">&times;</button>
+            </div>
+            <div class="nbt-editor-content">
+                <div class="form-group">
+                    <label>NBT JSON</label>
+                    <textarea id="nbtTextarea" placeholder='{"key":"value"}'></textarea>
+                    <div id="nbtTextareaError" class="error"></div>
+                </div>
+
+                <div class="nbt-quick-actions">
+                    <button type="button" class="btn" id="nbtClearBtn">清除</button>
+                    <button type="button" class="btn" id="nbtCustomNameBtn">自定义名称</button>
+                </div>
+
+                <div class="nbt-templates-section">
+                    <h3>NBT 预设</h3>
+                    <div class="nbt-template-toolbar">
+                        <label for="nbtPresetCategory">分类</label>
+                        <select id="nbtPresetCategory"></select>
+                    </div>
+                    <div id="nbtPresetList" class="nbt-template-grid"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn" id="nbtCancelBtn">取消</button>
+                    <button type="button" class="btn primary" id="nbtConfirmBtn">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

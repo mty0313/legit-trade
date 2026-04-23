@@ -1,0 +1,277 @@
+
+  "trades": [
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:white_blooming_oak_tree",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:yellow_blooming_oak_tree",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:pink_blooming_oak_tree",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_tiny",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_mini",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_small",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_middle",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_medium",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_straight",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_winding",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:oak_tree_lush",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_tiny",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_mini",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_small",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_middle",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_medium",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_straight",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_winding",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:maple_tree_lush",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_tiny",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_mini",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_small",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_middle",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_medium",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_straight",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_winding",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:sakura_tree_lush",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:normal_truck",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:dining_truck",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:villa_0",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:composite_building",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:octagon_pavilion",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:fancy_sakura_0",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:fancy_sakura_1",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:fancy_sakura_2",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:fancy_sakura_3",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    }
+  ]
+

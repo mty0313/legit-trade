@@ -1,0 +1,452 @@
+[
+  {
+    "id": "yuushya:stairs",
+    "name": "楼梯 模板",
+    "translationKey": "item.yuushya.stairs",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:slippers",
+    "name": "拖鞋 模板",
+    "translationKey": "item.yuushya.slippers",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:slab",
+    "name": "台阶 模板",
+    "translationKey": "item.yuushya.slab",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:side_slab",
+    "name": "侧半砖 模板",
+    "translationKey": "item.yuushya.side_slab",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:ridge",
+    "name": "脊 模板",
+    "translationKey": "item.yuushya.ridge",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:half_slab",
+    "name": "半半砖 模板",
+    "translationKey": "item.yuushya.half_slab",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:half_side_slab",
+    "name": "侧半半砖 模板",
+    "translationKey": "item.yuushya.half_side_slab",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:column",
+    "name": "梁 模板",
+    "translationKey": "item.yuushya.column",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:post",
+    "name": "柱 模板",
+    "translationKey": "item.yuushya.post",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:pole",
+    "name": "杆 模板",
+    "translationKey": "item.yuushya.pole",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:stick",
+    "name": "柄 模板",
+    "translationKey": "item.yuushya.stick",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:horizontal_column",
+    "name": "横向梁 模板",
+    "translationKey": "item.yuushya.horizontal_column",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:horizontal_post",
+    "name": "横向柱 模板",
+    "translationKey": "item.yuushya.horizontal_post",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:horizontal_pole",
+    "name": "横向杆 模板",
+    "translationKey": "item.yuushya.horizontal_pole",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:horizontal_stick",
+    "name": "横向柄 模板",
+    "translationKey": "item.yuushya.horizontal_stick",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:snow_layer",
+    "name": "雪层 模板",
+    "translationKey": "item.yuushya.snow_layer",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:platform",
+    "name": "平台 模板",
+    "translationKey": "item.yuushya.platform",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:average_table",
+    "name": "折叠桌 模板",
+    "translationKey": "item.yuushya.average_table",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:medium_table",
+    "name": "大号折叠桌 模板",
+    "translationKey": "item.yuushya.medium_table",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:big_table",
+    "name": "特大号折叠桌 模板",
+    "translationKey": "item.yuushya.big_table",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:white_bow_gift_box",
+    "name": "白丝带礼物盒 模板",
+    "translationKey": "item.yuushya.white_bow_gift_box",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:black_bow_gift_box",
+    "name": "黑丝带礼物盒 模板",
+    "translationKey": "item.yuushya.black_bow_gift_box",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:white_bow_small_gift_box",
+    "name": "白丝带小型礼物盒 模板",
+    "translationKey": "item.yuushya.white_bow_small_gift_box",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:black_bow_small_gift_box",
+    "name": "黑丝带小型礼物盒 模板",
+    "translationKey": "item.yuushya.black_bow_small_gift_box",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:decoration_bookshelf",
+    "name": "桌面书架 模板",
+    "translationKey": "item.yuushya.decoration_bookshelf",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:decorative_shelf",
+    "name": "装饰架 模板",
+    "translationKey": "item.yuushya.decorative_shelf",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:mounted_fern_pot",
+    "name": "挂墙盆栽 模板",
+    "translationKey": "item.yuushya.mounted_fern_pot",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:frame_top",
+    "name": "顶部框架 模板",
+    "translationKey": "item.yuushya.frame_top",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:frame_bottom",
+    "name": "底部框架 模板",
+    "translationKey": "item.yuushya.frame_bottom",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:frame_left",
+    "name": "左侧框架 模板",
+    "translationKey": "item.yuushya.frame_left",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:frame_right",
+    "name": "右侧框架 模板",
+    "translationKey": "item.yuushya.frame_right",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:fence",
+    "name": "栅栏 模板",
+    "translationKey": "item.yuushya.fence",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:fence_corner",
+    "name": "栅栏拐角 模板",
+    "translationKey": "item.yuushya.fence_corner",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:new_fence",
+    "name": "万向栅栏 模板",
+    "translationKey": "item.yuushya.new_fence",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:bucket",
+    "name": "桶 模板",
+    "translationKey": "item.yuushya.bucket",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:hollow_stairs",
+    "name": "镂空楼梯 模板",
+    "translationKey": "item.yuushya.hollow_stairs",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:handrail_left",
+    "name": "楼梯左扶手 模板",
+    "translationKey": "item.yuushya.handrail_left",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:handrail_middle",
+    "name": "楼梯扶手 模板",
+    "translationKey": "item.yuushya.handrail_middle",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:handrail_right",
+    "name": "楼梯右扶手 模板",
+    "translationKey": "item.yuushya.handrail_right",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:bench",
+    "name": "长椅 模板",
+    "translationKey": "item.yuushya.bench",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:park_bench",
+    "name": "公园长椅 模板",
+    "translationKey": "item.yuushya.park_bench",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:park_bench_no_handrail",
+    "name": "无扶手公园长椅 模板",
+    "translationKey": "item.yuushya.park_bench_no_handrail",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:couch",
+    "name": "沙发 模板",
+    "translationKey": "item.yuushya.couch",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:shelf",
+    "name": "架子 模板",
+    "translationKey": "item.yuushya.shelf",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:bookshelf",
+    "name": "书架 模板",
+    "translationKey": "item.yuushya.bookshelf",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:uncovered_shelf",
+    "name": "无盖架子 模板",
+    "translationKey": "item.yuushya.uncovered_shelf",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:rain_shed",
+    "name": "雨棚 模板",
+    "translationKey": "item.yuushya.rain_shed",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:lengthened_rain_shed",
+    "name": "加长雨棚 模板",
+    "translationKey": "item.yuushya.lengthened_rain_shed",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:ladder",
+    "name": "梯子 模板",
+    "translationKey": "item.yuushya.ladder",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:leaning_ladder",
+    "name": "长梯 模板",
+    "translationKey": "item.yuushya.leaning_ladder",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:foldable_ladder",
+    "name": "折叠梯 模板",
+    "translationKey": "item.yuushya.foldable_ladder",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:clock",
+    "name": "钟 模板",
+    "translationKey": "item.yuushya.clock",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:round_clock",
+    "name": "圆形钟 模板",
+    "translationKey": "item.yuushya.round_clock",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:skateboard",
+    "name": "滑板 模板",
+    "translationKey": "item.yuushya.skateboard",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:leaned_skateboard",
+    "name": "靠墙滑板 模板",
+    "translationKey": "item.yuushya.leaned_skateboard",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:park_stool",
+    "name": "凳子 模板",
+    "translationKey": "item.yuushya.park_stool",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:seat",
+    "name": "椅子 模板",
+    "translationKey": "item.yuushya.seat",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:cushion_armchair",
+    "name": "扶手坐垫椅 模板",
+    "translationKey": "item.yuushya.cushion_armchair",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:chair",
+    "name": "座椅 模板",
+    "translationKey": "item.yuushya.chair",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:office_chair",
+    "name": "办公室椅 模板",
+    "translationKey": "item.yuushya.office_chair",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:bar_stool",
+    "name": "吧台椅 模板",
+    "translationKey": "item.yuushya.bar_stool",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:basket",
+    "name": "篮子 模板",
+    "translationKey": "item.yuushya.basket",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:bicycle",
+    "name": "自行车 模板",
+    "translationKey": "item.yuushya.bicycle",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:venetian_blinds",
+    "name": "百叶窗 模板",
+    "translationKey": "item.yuushya.venetian_blinds",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:cart",
+    "name": "小推车 模板",
+    "translationKey": "item.yuushya.cart",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:board",
+    "name": "亚克力板 模板",
+    "translationKey": "item.yuushya.board",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:bottle_container",
+    "name": "瓶子篮筐 模板",
+    "translationKey": "item.yuushya.bottle_container",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:ring_light",
+    "name": "环状灯 模板",
+    "translationKey": "item.yuushya.ring_light",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:hanging_light",
+    "name": "吊灯 模板",
+    "translationKey": "item.yuushya.hanging_light",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:warning_slab",
+    "name": "警示台阶 模板",
+    "translationKey": "item.yuushya.warning_slab",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:backpack",
+    "name": "背包 模板",
+    "translationKey": "item.yuushya.backpack",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:phone",
+    "name": "手机 模板",
+    "translationKey": "item.yuushya.phone",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:piano",
+    "name": "钢琴 模板",
+    "translationKey": "item.yuushya.piano",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:audio",
+    "name": "音响 模板",
+    "translationKey": "item.yuushya.audio",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:audio_large",
+    "name": "大音响 模板",
+    "translationKey": "item.yuushya.audio_large",
+    "maxCount": 64
+  }
+]

@@ -3,11 +3,38 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.mod_version
+// Version management
+// gradle.properties: mod_version=1.0.2
+// Default build: 1.0.2-SNAPSHOT-20260423140900
+// -Prelease: 1.0.2-RELEASE
+
+def baseVersion = project.mod_version
+
+if (project.hasProperty('release')) {
+	version = "${baseVersion}-RELEASE"
+} else {
+	def timestamp = new Date().format('yyyyMMdd', TimeZone.getTimeZone('GMT+8'))
+	version = "${baseVersion}-SNAPSHOT-${timestamp}"
+}
+
 group = project.maven_group
 
 repositories {
 	mavenCentral()
+	// Javalin dependencies
+	maven { url 'https://repo.maven.apache.org/maven2/' }
+}
+
+loom {
+	runs {
+		gametest {
+			inherit server
+			name "Game Test"
+			vmArg "-Dfabric-api.gametest"
+			vmArg "-Dfabric-api.gametest.report-file=${project.buildDir}/junit.xml"
+			runDir "build/gametest"
+		}
+	}
 }
 
 dependencies {
@@ -15,6 +42,9 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+	// NanoHTTPD - lightweight embedded HTTP server with no external dependencies
+	include(implementation('org.nanohttpd:nanohttpd:2.3.1'))
 }
 
 base {
@@ -39,7 +69,7 @@ java {
 	def javaVersion = JavaVersion.toVersion(targetJavaVersion)
 	sourceCompatibility = javaVersion
 	targetCompatibility = javaVersion
-	withSourcesJar()
+	// withSourcesJar() - disabled, not needed for mod distribution
 }
 
 jar {

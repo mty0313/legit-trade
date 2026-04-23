@@ -214,8 +214,8 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
 
             TradeConfig.TradeEntry trade = groupTrades.get(i);
             boolean affordable = handler.canAffordTradeAt(globalIndex);
-            ItemStack inputIcon = trade.getInputItem() != null ? new ItemStack(trade.getInputItem()) : ItemStack.EMPTY;
-            ItemStack outputIcon = trade.getOutputItem() != null ? new ItemStack(trade.getOutputItem()) : ItemStack.EMPTY;
+            ItemStack inputIcon = trade.createInputPreviewStack();
+            ItemStack outputIcon = trade.createOutputStack();
 
             int inputIconX = LEFT_PANEL_X + 4;
             int inputCountX = LEFT_PANEL_X + 22;

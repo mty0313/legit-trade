@@ -1,142 +1,333 @@
 [
   {
-    "group": "建材",
+    "group": "白手起家",
     "trades": [
       {
         "input": "minecraft:dirt",
-        "output": "minecraft:stone",
+        "output": "minecraft:emerald",
         "inputCount": 1,
         "outputCount": 64,
-        "xpReward": 500
-      },
-      {
-        "input": "minecraft:cobblestone",
-        "output": "minecraft:oak_log",
-        "inputCount": 1,
-        "outputCount": 32,
-        "xpReward": 400
-      },
-      {
-        "input": "minecraft:oak_planks",
-        "output": "minecraft:glass",
-        "inputCount": 1,
-        "outputCount": 32,
-        "xpReward": 450
+        "xpReward": 20
       },
       {
         "input": "minecraft:sand",
-        "output": "minecraft:quartz_block",
-        "inputCount": 1,
-        "outputCount": 16,
-        "xpReward": 600
-      },
-      {
-        "input": "minecraft:gravel",
-        "output": "minecraft:bricks",
-        "inputCount": 1,
-        "outputCount": 16,
-        "xpReward": 550
-      },
-      {
-        "input": "minecraft:clay_ball",
-        "output": "minecraft:glowstone",
-        "inputCount": 1,
-        "outputCount": 16,
-        "xpReward": 700
-      }
-    ]
-  },
-  {
-    "group": "资源",
-    "trades": [
-      {
-        "input": "minecraft:coal",
-        "output": "minecraft:iron_ingot",
-        "inputCount": 1,
-        "outputCount": 16,
-        "xpReward": 600
-      },
-      {
-        "input": "minecraft:iron_nugget",
-        "output": "minecraft:gold_ingot",
-        "inputCount": 1,
-        "outputCount": 8,
-        "xpReward": 800
-      },
-      {
-        "input": "minecraft:copper_ingot",
         "output": "minecraft:emerald",
         "inputCount": 1,
-        "outputCount": 8,
-        "xpReward": 900
+        "outputCount": 64,
+        "xpReward": 20
       },
       {
-        "input": "minecraft:redstone",
-        "output": "minecraft:diamond",
+        "input": "minecraft:emerald",
+        "output": "minecraft:golden_carrot",
         "inputCount": 1,
-        "outputCount": 4,
-        "xpReward": 1200
+        "outputCount": 64,
+        "xpReward": 20
       },
       {
-        "input": "minecraft:lapis_lazuli",
-        "output": "minecraft:netherite_scrap",
+        "input": "minecraft:emerald",
+        "output": "minecraft:red_bed",
         "inputCount": 1,
         "outputCount": 1,
-        "xpReward": 2000
+        "xpReward": 20
       },
       {
-        "input": "minecraft:amethyst_shard",
-        "output": "minecraft:ender_pearl",
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_sword",
         "inputCount": 1,
-        "outputCount": 8,
-        "xpReward": 1000
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_pickaxe",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_axe",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_shovel",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_hoe",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_helmet",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_chestplate",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_leggings",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:netherite_boots",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 25
       }
     ]
   },
   {
-    "group": "食物与工具",
+    "group": "建材",
     "trades": [
       {
-        "input": "minecraft:wheat",
-        "output": "minecraft:golden_apple",
+        "input": "minecraft:emerald",
+        "output": "minecraft:scaffolding",
         "inputCount": 1,
-        "outputCount": 8,
-        "xpReward": 900
+        "outputCount": 64,
+        "xpReward": 10
       },
       {
-        "input": "minecraft:potato",
-        "output": "minecraft:cooked_beef",
+        "input": "minecraft:emerald",
+        "output": "yuushya:block_blueprint",
         "inputCount": 1,
-        "outputCount": 32,
-        "xpReward": 500
+        "outputCount": 16,
+        "xpReward": 10
       },
       {
-        "input": "minecraft:carrot",
-        "output": "minecraft:enchanted_golden_apple",
+        "input": "minecraft:emerald",
+        "output": "yuushya:wood_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:stone_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:fabric_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:catering_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:living_being_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:store_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:sign_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:furniture_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:lighting_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:facility_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:traffic_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:extra_shapes_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:window_blueprint",
+        "inputCount": 1,
+        "outputCount": 16,
+        "xpReward": 10
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "yuushya:get_lit_item",
         "inputCount": 1,
         "outputCount": 1,
-        "xpReward": 2500
+        "xpReward": 10
       },
       {
-        "input": "minecraft:stick",
-        "output": "minecraft:diamond_pickaxe",
+        "input": "minecraft:emerald",
+        "output": "yuushya:form_trans_item",
         "inputCount": 1,
         "outputCount": 1,
-        "xpReward": 1800
+        "xpReward": 10
+      }
+      
+    ]
+  },
+  {
+    "group": "附魔书",
+    "trades": [
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:sharpness\",lvl:5s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
       },
       {
-        "input": "minecraft:string",
-        "output": "minecraft:elytra",
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:protection\",lvl:4s}]}",
         "inputCount": 1,
         "outputCount": 1,
-        "xpReward": 3000
+        "xpReward": 15
       },
       {
-        "input": "minecraft:paper",
-        "output": "minecraft:totem_of_undying",
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:unbreaking\",lvl:3s}]}",
         "inputCount": 1,
         "outputCount": 1,
-        "xpReward": 3500
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:mending\",lvl:1s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:efficiency\",lvl:5s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:fortune\",lvl:3s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:looting\",lvl:3s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:feather_falling\",lvl:4s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:infinity\",lvl:1s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"minecraft:silk_touch\",lvl:1s}]}",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 15
+      }
+    ]
+  },
+  {
+    "group": "飞机",
+    "trades": [
+      {
+        "input": "minecraft:emerald",
+        "output": "minecraft:coal",
+        "inputCount": 1,
+        "outputCount": 64,
+        "xpReward": 20
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "immersive_aircraft:biplane",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 20
+      },
+      {
+        "input": "minecraft:emerald",
+        "output": "immersive_aircraft:airship",
+        "inputCount": 1,
+        "outputCount": 1,
+        "xpReward": 20
       }
     ]
   }

@@ -26,6 +26,9 @@ public class ConfigSyncPacket {
                 TradeConfig.TradeEntry trade = group.trades.get(i);
                 buf.writeString(trade.input, TradeConfig.MAX_ITEM_ID_LENGTH);
                 buf.writeString(trade.output, TradeConfig.MAX_ITEM_ID_LENGTH);
+                writeOptionalString(buf, trade.inputNbt, TradeConfig.MAX_NBT_LENGTH);
+                writeOptionalString(buf, trade.outputNbt, TradeConfig.MAX_NBT_LENGTH);
+                buf.writeString(trade.nbtMatchMode.name(), 16);
                 buf.writeInt(trade.inputCount);
                 buf.writeInt(trade.outputCount);
                 buf.writeInt(trade.xpReward);
@@ -53,11 +56,19 @@ public class ConfigSyncPacket {
                 for (int i = 0; i < tradeCount; i++) {
                     String input = buf.readString(TradeConfig.MAX_ITEM_ID_LENGTH);
                     String output = buf.readString(TradeConfig.MAX_ITEM_ID_LENGTH);
+                    String inputNbt = readOptionalString(buf, TradeConfig.MAX_NBT_LENGTH);
+                    String outputNbt = readOptionalString(buf, TradeConfig.MAX_NBT_LENGTH);
+                    String nbtMatchModeStr = buf.readString(16);
                     int inputCount = buf.readInt();
                     int outputCount = buf.readInt();
                     int xpReward = buf.readInt();
 
-                    TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(input, output, inputCount, outputCount, xpReward);
+                    TradeConfig.NbtMatchMode nbtMatchMode = TradeConfig.NbtMatchMode.EXACT;
+                    try {
+                        nbtMatchMode = TradeConfig.NbtMatchMode.valueOf(nbtMatchModeStr);
+                    } catch (IllegalArgumentException ignored) {}
+
+                    TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(input, output, inputNbt, outputNbt, nbtMatchMode, inputCount, outputCount, xpReward);
                     if (entry.isValid()) {
                         trades.add(entry);
                     }
@@ -71,6 +82,22 @@ public class ConfigSyncPacket {
         } catch (RuntimeException ignored) {
             return List.of();
         }
+    }
+
+    private static void writeOptionalString(PacketByteBuf buf, String value, int maxLength) {
+        boolean hasValue = value != null && !value.isBlank();
+        buf.writeBoolean(hasValue);
+        if (hasValue) {
+            buf.writeString(value, maxLength);
+        }
+    }
+
+    private static String readOptionalString(PacketByteBuf buf, int maxLength) {
+        if (!buf.readBoolean()) {
+            return null;
+        }
+        String value = buf.readString(maxLength);
+        return value.isBlank() ? null : value;
     }
 
     public static void sendToClient(net.minecraft.server.network.ServerPlayerEntity player) {
