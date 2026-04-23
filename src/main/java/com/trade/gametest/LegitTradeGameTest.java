@@ -163,4 +163,44 @@ public class LegitTradeGameTest implements FabricGameTest {
         context.assertTrue(TradeBlocks.TRADE_BLOCK != null, "Trade block should be registered");
         context.complete();
     }
+
+    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    public void nbtMatchModeExact(TestContext context) {
+        TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(
+            "minecraft:diamond_sword",
+            "minecraft:emerald",
+            "{Enchantments:[{id:\"minecraft:sharpness\",lvl:5s}]}",
+            null,
+            TradeConfig.NbtMatchMode.EXACT,
+            1, 1, 0
+        );
+
+        ItemStack exactMatch = new ItemStack(Items.DIAMOND_SWORD);
+        exactMatch.getOrCreateNbt().putString("Enchantments", "[{id:\"minecraft:sharpness\",lvl:5s}]");
+
+        ItemStack withExtra = new ItemStack(Items.DIAMOND_SWORD);
+        withExtra.getOrCreateNbt().putString("Enchantments", "[{id:\"minecraft:sharpness\",lvl:5s}]");
+        withExtra.getOrCreateNbt().putString("display", "{Name:\"test\"}");
+
+        context.assertTrue(entry.isValid(), "NBT trade entry should be valid");
+        context.complete();
+    }
+
+    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    public void nbtMatchModeIgnore(TestContext context) {
+        TradeConfig.TradeEntry entry = new TradeConfig.TradeEntry(
+            "minecraft:diamond_sword",
+            "minecraft:emerald",
+            "{Enchantments:[{id:\"minecraft:sharpness\",lvl:5s}]}",
+            null,
+            TradeConfig.NbtMatchMode.IGNORE,
+            1, 1, 0
+        );
+
+        ItemStack anySword = new ItemStack(Items.DIAMOND_SWORD);
+
+        context.assertTrue(entry.isValid(), "Ignore mode trade should be valid");
+        context.assertTrue(entry.matchesInputStack(anySword), "Ignore mode should match any NBT");
+        context.complete();
+    }
 }

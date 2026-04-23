@@ -33,6 +33,12 @@ public class TradeConfig {
 	public static final int MAX_ITEM_ID_LENGTH = 128;
 	public static final int MAX_GROUP_NAME_LENGTH = 64;
 	public static final int MAX_NBT_LENGTH = 4096;
+
+	public enum NbtMatchMode {
+		EXACT,
+		CONTAINS,
+		IGNORE
+	}
 	private static volatile List<TradeGroup> tradeGroups = Collections.emptyList();
 	private static volatile List<TradeEntry> trades = Collections.emptyList();
 
@@ -74,6 +80,7 @@ public class TradeConfig {
 		public final String output;
 		public final String inputNbt;
 		public final String outputNbt;
+		public final NbtMatchMode nbtMatchMode;
 		public final int inputCount;
 		public final int outputCount;
 		public final int xpReward;
@@ -81,14 +88,19 @@ public class TradeConfig {
 		private final NbtCompound outputNbtCompound;
 
 		public TradeEntry(String input, String output, int inputCount, int outputCount, int xpReward) {
-			this(input, output, null, null, inputCount, outputCount, xpReward);
+			this(input, output, null, null, NbtMatchMode.EXACT, inputCount, outputCount, xpReward);
 		}
 
 		public TradeEntry(String input, String output, String inputNbt, String outputNbt, int inputCount, int outputCount, int xpReward) {
+			this(input, output, inputNbt, outputNbt, NbtMatchMode.EXACT, inputCount, outputCount, xpReward);
+		}
+
+		public TradeEntry(String input, String output, String inputNbt, String outputNbt, NbtMatchMode nbtMatchMode, int inputCount, int outputCount, int xpReward) {
 			this.input = input;
 			this.output = output;
 			this.inputNbt = normalizeNbtString(inputNbt);
 			this.outputNbt = normalizeNbtString(outputNbt);
+			this.nbtMatchMode = nbtMatchMode != null ? nbtMatchMode : NbtMatchMode.EXACT;
 			this.inputCount = inputCount;
 			this.outputCount = outputCount;
 			this.xpReward = xpReward;
@@ -136,11 +148,33 @@ public class TradeConfig {
 			if (item == null || stack.isEmpty() || stack.getItem() != item) {
 				return false;
 			}
+			if (nbtMatchMode == NbtMatchMode.IGNORE) {
+				return true;
+			}
 			if (inputNbtCompound == null) {
 				return true;
 			}
 			NbtCompound stackNbt = stack.getNbt();
-			return stackNbt != null && stackNbt.equals(inputNbtCompound);
+			if (stackNbt == null) {
+				return false;
+			}
+			if (nbtMatchMode == NbtMatchMode.EXACT) {
+				return stackNbt.equals(inputNbtCompound);
+			}
+			// CONTAINS mode
+			return containsNbt(stackNbt, inputNbtCompound);
+		}
+
+		private static boolean containsNbt(NbtCompound stackNbt, NbtCompound requiredNbt) {
+			for (String key : requiredNbt.getKeys()) {
+				if (!stackNbt.contains(key)) {
+					return false;
+				}
+				if (!stackNbt.get(key).equals(requiredNbt.get(key))) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public ItemStack createInputPreviewStack() {
@@ -291,13 +325,29 @@ public class TradeConfig {
 		String inputNbt;
 		String outputNbt;
 		String nbt;
+		String nbtMatchMode;
 		int inputCount = 1;
 		int outputCount = 1;
 		int xpReward = 0;
 
 		TradeEntry toTradeEntry() {
 			String finalOutputNbt = (outputNbt != null && !outputNbt.isBlank()) ? outputNbt : nbt;
-			return new TradeEntry(input, output, inputNbt, finalOutputNbt, clampTradeCount(inputCount), clampTradeCount(outputCount), xpReward);
+			NbtMatchMode mode = parseNbtMatchMode(nbtMatchMode);
+			return new TradeEntry(input, output, inputNbt, finalOutputNbt, mode, clampTradeCount(inputCount), clampTradeCount(outputCount), xpReward);
+		}
+
+		private static NbtMatchMode parseNbtMatchMode(String mode) {
+			if (mode == null || mode.isBlank()) {
+				return NbtMatchMode.EXACT;
+			}
+			switch (mode.toLowerCase()) {
+				case "contains":
+					return NbtMatchMode.CONTAINS;
+				case "ignore":
+					return NbtMatchMode.IGNORE;
+				default:
+					return NbtMatchMode.EXACT;
+			}
 		}
 	}
 
@@ -356,7 +406,7 @@ public class TradeConfig {
 
 	private static List<TradeGroup> getDefaultTradeGroups() {
 		List<TradeEntry> buildingTrades = new ArrayList<>();
-		buildingTrades.add(new TradeEntry("minecraft:dirt", "minecraft:diamond", 64, 1, 100));
+		buildingTrades.add(new TradeEntry("minecraft:dirt", "minecraft:sand", 64, 1, 1));
 		return List.of(new TradeGroup("Building", buildingTrades));
 	}
 }

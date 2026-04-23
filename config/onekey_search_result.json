@@ -1,0 +1,236 @@
+[
+  {
+    "id": "yuushya:oak_tree",
+    "name": "一键生成 - 橡树",
+    "translationKey": "item.yuushya.oak_tree",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:white_blooming_oak_tree",
+    "name": "一键生成 - 白花橡树",
+    "translationKey": "item.yuushya.white_blooming_oak_tree",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:yellow_blooming_oak_tree",
+    "name": "一键生成 - 黄花橡树",
+    "translationKey": "item.yuushya.yellow_blooming_oak_tree",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:pink_blooming_oak_tree",
+    "name": "一键生成 - 粉花橡树",
+    "translationKey": "item.yuushya.pink_blooming_oak_tree",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_tiny",
+    "name": "一键生成 - 小橡树 1",
+    "translationKey": "item.yuushya.oak_tree_tiny",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_mini",
+    "name": "一键生成 - 小橡树 2",
+    "translationKey": "item.yuushya.oak_tree_mini",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_small",
+    "name": "一键生成 - 小橡树 3",
+    "translationKey": "item.yuushya.oak_tree_small",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_middle",
+    "name": "一键生成 - 小橡树 4",
+    "translationKey": "item.yuushya.oak_tree_middle",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_medium",
+    "name": "一键生成 - 中橡树 1",
+    "translationKey": "item.yuushya.oak_tree_medium",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_straight",
+    "name": "一键生成 - 中橡树 2",
+    "translationKey": "item.yuushya.oak_tree_straight",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_winding",
+    "name": "一键生成 - 风成偏形橡树",
+    "translationKey": "item.yuushya.oak_tree_winding",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:oak_tree_lush",
+    "name": "一键生成 - 大橡树",
+    "translationKey": "item.yuushya.oak_tree_lush",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree",
+    "name": "一键生成 - 枫树",
+    "translationKey": "item.yuushya.maple_tree",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_tiny",
+    "name": "一键生成 - 小枫树 1",
+    "translationKey": "item.yuushya.maple_tree_tiny",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_mini",
+    "name": "一键生成 - 小枫树 2",
+    "translationKey": "item.yuushya.maple_tree_mini",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_small",
+    "name": "一键生成 - 小枫树 3",
+    "translationKey": "item.yuushya.maple_tree_small",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_middle",
+    "name": "一键生成 - 小枫树 4",
+    "translationKey": "item.yuushya.maple_tree_middle",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_medium",
+    "name": "一键生成 - 中枫树 1",
+    "translationKey": "item.yuushya.maple_tree_medium",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_straight",
+    "name": "一键生成 - 中枫树 2",
+    "translationKey": "item.yuushya.maple_tree_straight",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_winding",
+    "name": "一键生成 - 风成偏形枫树",
+    "translationKey": "item.yuushya.maple_tree_winding",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:maple_tree_lush",
+    "name": "一键生成 - 大枫树",
+    "translationKey": "item.yuushya.maple_tree_lush",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree",
+    "name": "一键生成 - 樱花",
+    "translationKey": "item.yuushya.sakura_tree",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_tiny",
+    "name": "一键生成 - 小樱花 1",
+    "translationKey": "item.yuushya.sakura_tree_tiny",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_mini",
+    "name": "一键生成 - 小樱花 2",
+    "translationKey": "item.yuushya.sakura_tree_mini",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_small",
+    "name": "一键生成 - 小樱花 3",
+    "translationKey": "item.yuushya.sakura_tree_small",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_middle",
+    "name": "一键生成 - 小樱花 4",
+    "translationKey": "item.yuushya.sakura_tree_middle",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_medium",
+    "name": "一键生成 - 中樱花 1",
+    "translationKey": "item.yuushya.sakura_tree_medium",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_straight",
+    "name": "一键生成 - 中樱花 2",
+    "translationKey": "item.yuushya.sakura_tree_straight",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_winding",
+    "name": "一键生成 - 风成偏形樱花",
+    "translationKey": "item.yuushya.sakura_tree_winding",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:sakura_tree_lush",
+    "name": "一键生成 - 大樱花树",
+    "translationKey": "item.yuushya.sakura_tree_lush",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:normal_truck",
+    "name": "一键生成 - 货车",
+    "translationKey": "item.yuushya.normal_truck",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:dining_truck",
+    "name": "一键生成 - 餐车",
+    "translationKey": "item.yuushya.dining_truck",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:villa_0",
+    "name": "一键生成 - 三层民居",
+    "translationKey": "item.yuushya.villa_0",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:composite_building",
+    "name": "一键生成 - 紧凑型商住一体临街公寓楼",
+    "translationKey": "item.yuushya.composite_building",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:octagon_pavilion",
+    "name": "一键生成 - 八角凉亭",
+    "translationKey": "item.yuushya.octagon_pavilion",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:fancy_sakura_0",
+    "name": "一键生成 - 精致樱花树 1",
+    "translationKey": "item.yuushya.fancy_sakura_0",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:fancy_sakura_1",
+    "name": "一键生成 - 精致樱花树 2",
+    "translationKey": "item.yuushya.fancy_sakura_1",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:fancy_sakura_2",
+    "name": "一键生成 - 精致樱花树 3",
+    "translationKey": "item.yuushya.fancy_sakura_2",
+    "maxCount": 64
+  },
+  {
+    "id": "yuushya:fancy_sakura_3",
+    "name": "一键生成 - 精致樱花树 4",
+    "translationKey": "item.yuushya.fancy_sakura_3",
+    "maxCount": 64
+  }
+]

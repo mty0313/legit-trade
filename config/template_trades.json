@@ -1,0 +1,529 @@
+{
+  "trades": [
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:stairs",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:slippers",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:slab",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:side_slab",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:ridge",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:half_slab",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:half_side_slab",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:column",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:post",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:pole",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:stick",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:horizontal_column",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:horizontal_post",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:horizontal_pole",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:horizontal_stick",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:snow_layer",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:platform",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:average_table",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:medium_table",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:big_table",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:white_bow_gift_box",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:black_bow_gift_box",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:white_bow_small_gift_box",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:black_bow_small_gift_box",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:decoration_bookshelf",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:decorative_shelf",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:mounted_fern_pot",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:frame_top",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:frame_bottom",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:frame_left",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:frame_right",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:fence",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:fence_corner",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:new_fence",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:bucket",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:hollow_stairs",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:handrail_left",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:handrail_middle",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:handrail_right",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:bench",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:park_bench",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:park_bench_no_handrail",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:couch",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:shelf",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:bookshelf",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:uncovered_shelf",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:rain_shed",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:lengthened_rain_shed",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:ladder",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:leaning_ladder",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:foldable_ladder",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:clock",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:round_clock",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:skateboard",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:leaned_skateboard",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:park_stool",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:seat",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:cushion_armchair",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:chair",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:office_chair",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:bar_stool",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:basket",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:bicycle",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:venetian_blinds",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:cart",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:board",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:bottle_container",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:ring_light",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:hanging_light",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:warning_slab",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:backpack",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:phone",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:piano",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:audio",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    },
+    {
+      "input": "minecraft:emerald",
+      "output": "yuushya:audio_large",
+      "inputCount": 1,
+      "outputCount": 16,
+      "xpReward": 30
+    }
+  ]
+}
