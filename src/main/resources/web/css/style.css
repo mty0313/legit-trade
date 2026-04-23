@@ -566,9 +566,6 @@ form {
     overflow-y: auto;
     z-index: 100;
     display: none;
-    width: 100%;
-    top: 100%;
-    left: 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 

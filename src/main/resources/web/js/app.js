@@ -412,6 +412,14 @@ function setupItemSearch(inputId, suggestionsId) {
             suggestions.innerHTML += `<div class="load-more" tabindex="-1" aria-hidden="true">已展示前${MAX_DISPLAY}项（共${filtered.length}项）</div>`;
         }
 
+        // Position suggestions directly below input
+        const inputRect = input.getBoundingClientRect();
+        const formGroup = input.closest('.form-group');
+        const formGroupRect = formGroup.getBoundingClientRect();
+        suggestions.style.top = `${inputRect.bottom - formGroupRect.top}px`;
+        suggestions.style.left = `${inputRect.left - formGroupRect.left}px`;
+        suggestions.style.width = `${inputRect.width}px`;
+
         suggestions.classList.add('show');
         selectedIndex = -1;
 
