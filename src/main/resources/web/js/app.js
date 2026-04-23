@@ -190,6 +190,10 @@ async function loadTrades() {
     try {
         const res = await fetch('/api/trades');
         groups = await res.json();
+        // Default select first group on initial load
+        if (groups.length > 0 && selectedGroupIndex < 0) {
+            selectedGroupIndex = 0;
+        }
         renderGroups();
         renderTrades();
         markSavedSnapshot();
