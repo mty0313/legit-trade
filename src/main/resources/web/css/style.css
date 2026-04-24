@@ -94,14 +94,25 @@ main {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 20px;
+    height: calc(100vh - 140px);
 }
 
-.groups-panel, .trades-panel, .edit-panel {
+.groups-panel, .edit-panel {
     background: #fff;
     border-radius: 8px;
     padding: 16px;
     min-height: 200px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.trades-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .panel-header {
@@ -251,11 +262,6 @@ main {
     color: #d32f2f;
 }
 
-.trades-panel {
-    display: flex;
-    flex-direction: column;
-}
-
 .trades-panel.empty {
     display: flex;
     align-items: center;
@@ -276,6 +282,9 @@ main {
     position: relative;
     padding-top: 2px;
     padding-bottom: 2px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 #tradesList.drop-at-start::before,

@@ -1,6 +1,7 @@
 package com.trade.gui;
 
 import com.trade.TradeConfig;
+import com.trade.network.TradeSelectPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
@@ -336,9 +337,8 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
 
                 int index = getClickedTradeIndex(mouseY);
                 if (index >= 0 && index < handler.getTradeCount()) {
-                    int id = TradeScreenHandler.SELECT_TRADE_BASE_BUTTON_ID + index;
-                    this.client.interactionManager.clickButton(this.handler.syncId, id);
-                    this.handler.onButtonClick(this.client.player, id);
+                    TradeSelectPacket.sendToServer(this.handler.syncId, index);
+                    this.handler.selectTrade(this.client.player, index);
                     return true;
                 }
             }

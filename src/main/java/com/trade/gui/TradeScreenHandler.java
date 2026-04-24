@@ -318,22 +318,26 @@ public class TradeScreenHandler extends ScreenHandler {
         return result;
     }
 
+    public boolean selectTrade(PlayerEntity player, int index) {
+        int tradeCount = getTradeCount();
+        if (index < 0 || index >= tradeCount) {
+            return false;
+        }
+
+        selectedTradeIndex = index;
+        if (!player.getWorld().isClient) {
+            autoFillSelectedTrade(player);
+            refreshOutputPreview();
+        }
+        sendContentUpdates();
+        return true;
+    }
+
     @Override
     public boolean onButtonClick(PlayerEntity player, int id) {
         if (id >= SELECT_TRADE_BASE_BUTTON_ID) {
             int index = id - SELECT_TRADE_BASE_BUTTON_ID;
-            int tradeCount = getTradeCount();
-            if (index < 0 || index >= tradeCount) {
-                return false;
-            }
-
-            selectedTradeIndex = index;
-            if (!player.getWorld().isClient) {
-                autoFillSelectedTrade(player);
-                refreshOutputPreview();
-            }
-            sendContentUpdates();
-            return true;
+            return selectTrade(player, index);
         }
         return false;
     }

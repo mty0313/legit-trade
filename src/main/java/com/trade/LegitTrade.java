@@ -2,6 +2,7 @@ package com.trade;
 
 import com.trade.network.ConfigSyncPacket;
 import com.trade.network.TradePackets;
+import com.trade.network.TradeSelectPacket;
 import com.trade.web.WebConfig;
 import com.trade.web.WebServer;
 import net.fabricmc.api.ModInitializer;
@@ -18,6 +19,7 @@ public class LegitTrade implements ModInitializer {
     public void onInitialize() {
         TradeBlocks.register();
         TradePackets.register();
+        TradeSelectPacket.registerServerReceiver();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             TradeConfig.load();

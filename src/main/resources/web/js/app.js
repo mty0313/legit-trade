@@ -854,7 +854,7 @@ function renderTrades() {
         return;
     }
 
-    panel.style.display = 'block';
+    panel.style.display = 'flex';
     const group = groups[selectedGroupIndex];
     nameEl.textContent = group.group;
 
