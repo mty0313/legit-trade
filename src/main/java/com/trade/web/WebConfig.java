@@ -14,7 +14,7 @@ public class WebConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger("legittrade");
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	private int port = 8765;
+	private int port = 39482;
 	private boolean enabled = true;
 	private String bindAddress = "0.0.0.0";
 
