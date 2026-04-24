@@ -15,10 +15,11 @@ public final class TradeSelectPacket {
     private TradeSelectPacket() {
     }
 
-    public static void sendToServer(int syncId, int tradeIndex) {
+    public static void sendToServer(int syncId, int tradeIndex, boolean shiftHeld) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeInt(syncId);
         buf.writeInt(tradeIndex);
+        buf.writeBoolean(shiftHeld);
         ClientPlayNetworking.send(ID, buf);
     }
 
@@ -26,18 +27,19 @@ public final class TradeSelectPacket {
         ServerPlayNetworking.registerGlobalReceiver(ID, (server, player, handler, buf, responseSender) -> {
             int syncId = buf.readInt();
             int tradeIndex = buf.readInt();
+            boolean shiftHeld = buf.readBoolean();
 
-            server.execute(() -> handleSelection(player, syncId, tradeIndex));
+            server.execute(() -> handleSelection(player, syncId, tradeIndex, shiftHeld));
         });
     }
 
-    private static void handleSelection(ServerPlayerEntity player, int syncId, int tradeIndex) {
+    private static void handleSelection(ServerPlayerEntity player, int syncId, int tradeIndex, boolean shiftHeld) {
         if (!(player.currentScreenHandler instanceof TradeScreenHandler tradeHandler)) {
             return;
         }
         if (tradeHandler.syncId != syncId) {
             return;
         }
-        tradeHandler.selectTrade(player, tradeIndex);
+        tradeHandler.selectTrade(player, tradeIndex, shiftHeld);
     }
 }

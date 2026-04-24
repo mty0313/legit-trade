@@ -214,17 +214,20 @@ public class TradeConfig {
 			if (inputId == null || outputId == null) {
 				return false;
 			}
+			if (!Registries.ITEM.containsId(inputId) || !Registries.ITEM.containsId(outputId)) {
+				return false;
+			}
 			if (inputNbt != null && (inputNbt.length() > MAX_NBT_LENGTH || inputNbtCompound == null)) {
 				return false;
 			}
 			if (outputNbt != null && (outputNbt.length() > MAX_NBT_LENGTH || outputNbtCompound == null)) {
 				return false;
 			}
+			Item inputItem = Registries.ITEM.get(inputId);
+			int inputMaxCount = inputItem.getMaxCount();
 			return input.length() <= MAX_ITEM_ID_LENGTH
 				&& output.length() <= MAX_ITEM_ID_LENGTH
-				&& Registries.ITEM.containsId(inputId)
-				&& Registries.ITEM.containsId(outputId)
-				&& inputCount >= 1 && inputCount <= MAX_STACK_COUNT
+				&& inputCount >= 1 && inputCount <= inputMaxCount
 				&& outputCount >= 1 && outputCount <= MAX_STACK_COUNT
 				&& xpReward >= 0;
 		}

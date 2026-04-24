@@ -337,8 +337,9 @@ public class TradeScreen extends HandledScreen<TradeScreenHandler> {
 
                 int index = getClickedTradeIndex(mouseY);
                 if (index >= 0 && index < handler.getTradeCount()) {
-                    TradeSelectPacket.sendToServer(this.handler.syncId, index);
-                    this.handler.selectTrade(this.client.player, index);
+                    boolean shiftHeld = hasShiftDown();
+                    TradeSelectPacket.sendToServer(this.handler.syncId, index, shiftHeld);
+                    this.handler.selectTrade(this.client.player, index, shiftHeld);
                     return true;
                 }
             }

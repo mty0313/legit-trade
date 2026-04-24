@@ -222,13 +222,13 @@ public class TradeScreenHandler extends ScreenHandler {
         }
     }
 
-    private void autoFillSelectedTrade(PlayerEntity player) {
+    private void autoFillSelectedTrade(PlayerEntity player, boolean fillToMax) {
         TradeConfig.TradeEntry trade = getSelectedTrade();
         if (trade == null || trade.inputCount <= 0 || trade.getInputItem() == null) {
             return;
         }
 
-        int targetInputCount = Math.min(trade.inputCount, trade.getInputItem().getMaxCount());
+        int maxStackSize = trade.getInputItem().getMaxCount();
         ItemStack inputStack = inputInventory.getStack(INPUT_SLOT);
 
         if (!inputStack.isEmpty() && !trade.matchesInputStack(inputStack)) {
@@ -239,12 +239,20 @@ public class TradeScreenHandler extends ScreenHandler {
         }
 
         int currentCount = trade.matchesInputStack(inputStack) ? inputStack.getCount() : 0;
-        int needed = targetInputCount - currentCount;
-        if (needed <= 0) {
+        int spaceAvailable = maxStackSize - currentCount;
+        if (spaceAvailable <= 0) {
             inputInventory.markDirty();
             sendContentUpdates();
             return;
         }
+
+        int toFill;
+        if (fillToMax) {
+            toFill = spaceAvailable;
+        } else {
+            toFill = Math.min(spaceAvailable, trade.inputCount);
+        }
+        int needed = toFill;
 
         for (int i = PLAYER_INV_START; i < PLAYER_INV_END && needed > 0; i++) {
             Slot sourceSlot = this.slots.get(i);
@@ -319,6 +327,10 @@ public class TradeScreenHandler extends ScreenHandler {
     }
 
     public boolean selectTrade(PlayerEntity player, int index) {
+        return selectTrade(player, index, false);
+    }
+
+    public boolean selectTrade(PlayerEntity player, int index, boolean shiftHeld) {
         int tradeCount = getTradeCount();
         if (index < 0 || index >= tradeCount) {
             return false;
@@ -326,7 +338,7 @@ public class TradeScreenHandler extends ScreenHandler {
 
         selectedTradeIndex = index;
         if (!player.getWorld().isClient) {
-            autoFillSelectedTrade(player);
+            autoFillSelectedTrade(player, shiftHeld);
             refreshOutputPreview();
         }
         sendContentUpdates();
