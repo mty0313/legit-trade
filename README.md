@@ -50,6 +50,12 @@ Fabric 1.20.1 交易模组。通过放置 `trade_block` 打开交易界面，用
 - NBT 编辑器
 - 保存后自动同步给在线玩家
 
+![交易列表界面](doc/img/brief.png)
+
+![交易编辑界面](doc/img/edit.png)
+
+![NBT编辑界面](doc/img/nbt-edit.png)
+
 配置文件：`config/legittrade-web.json`
 
 ```json
