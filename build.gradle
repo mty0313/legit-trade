@@ -57,6 +57,8 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version
 	}
+	// Exclude prototype textures - for archive only, not needed in mod
+	exclude "**/*_prototype.png"
 }
 
 def targetJavaVersion = 17
