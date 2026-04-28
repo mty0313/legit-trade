@@ -1,62 +1,64 @@
 # LegitTrade
 
-Fabric 1.20.1 交易模组。通过放置 `trade_block` 打开交易界面，用低价值物品换取高价值物品，并获得经验奖励。
+A Fabric 1.20.1 trade mod. Place `trade_block` to open trade GUI, exchange low-value items for high-value items with XP rewards.
 
-## 特性
+[中文文档](doc/README-cn.md)
 
-- **游戏内交易界面** - 右键 `trade_block` 打开 GUI
-- **分组交易** - 交易按分组组织，便于管理
-- **NBT 支持** - 支持带 NBT 物品的匹配与输出
-- **Web 配置界面** - 浏览器管理交易配置
-- **自动填充** - 选择交易后自动从背包填充输入槽
-- **批量交易** - Shift+点击输出槽连续执行多次交易
-- **热重载** - `/tradereload` 重载配置并同步在线玩家
+## Features
 
-## 构建
+- **In-game Trade GUI** - Right-click `trade_block` to open
+- **Grouped Trades** - Trades organized by groups for easy management
+- **NBT Support** - Match and output items with NBT data
+- **Web Config UI** - Manage trades via browser
+- **Auto-fill** - Automatically fill input slots from inventory
+- **Batch Trading** - Shift+click output slot for multiple trades
+- **Hot Reload** - `/tradereload` reloads config and syncs to online players
+
+## Build
 
 ```bash
 ./gradlew build
 ```
 
-产物：`build/libs/legittrade-1.0.2[-SNAPSHOT-日期].jar`
+Output: `build/libs/legittrade-1.0.2[-SNAPSHOT-date].jar`
 
-发布版本：
+Release build:
 ```bash
 ./gradlew build -Prelease
 ```
 
-## 使用
+## Usage
 
-### 游戏内
+### In-game
 
-1. 放置 `trade_block` 方块，右键打开交易界面
-2. 左侧显示分组交易列表
-3. 点击交易项，系统自动从背包填充输入槽
-4. 输入满足条件时，右侧显示输出预览
-5. 点击输出槽执行交易
-6. Shift+点击输出槽批量执行（直到背包满或输入不足）
+1. Place `trade_block` and right-click to open trade GUI
+2. Left panel shows grouped trade list
+3. Click a trade, system auto-fills input slots from inventory
+4. When input meets requirements, output preview shows on right
+5. Click output slot to execute trade
+6. Shift+click output slot for batch execution (until inventory full or input exhausted)
 
-### 命令
+### Commands
 
-- `/tradereload` - 服务端热重载配置，同步给在线玩家（需要 OP 权限）
+- `/tradereload` - Server-side hot reload, syncs to online players (requires OP)
 
-### Web 配置界面
+### Web Config UI
 
-服务端启动后访问 `http://服务器IP:39482`：
+After server starts, visit `http://server-ip:39482`:
 
-- 查看所有交易配置
-- 添加/编辑/删除交易
-- 搜索物品 ID
-- NBT 编辑器
-- 保存后自动同步给在线玩家
+- View all trade configs
+- Add/edit/delete trades
+- Search item IDs
+- NBT editor
+- Auto-sync to online players after save
 
-![交易列表界面](doc/img/brief.png)
+![Trade List](doc/img/brief.png)
 
-![交易编辑界面](doc/img/edit.png)
+![Trade Edit](doc/img/edit.png)
 
-![NBT编辑界面](doc/img/nbt-edit.png)
+![NBT Editor](doc/img/nbt-edit.png)
 
-配置文件：`config/legittrade-web.json`
+Config file: `config/legittrade-web.json`
 
 ```json
 {
@@ -66,16 +68,16 @@ Fabric 1.20.1 交易模组。通过放置 `trade_block` 打开交易界面，用
 }
 ```
 
-## 配置
+## Configuration
 
-路径：`config/legittrade.json`
+Path: `config/legittrade.json`
 
-### 分组格式（推荐）
+### Grouped Format (Recommended)
 
 ```json
 [
   {
-    "group": "建材",
+    "group": "Building",
     "trades": [
       {
         "input": "minecraft:dirt",
@@ -89,7 +91,7 @@ Fabric 1.20.1 交易模组。通过放置 `trade_block` 打开交易界面，用
 ]
 ```
 
-### NBT 支持
+### NBT Support
 
 ```json
 {
@@ -104,61 +106,61 @@ Fabric 1.20.1 交易模组。通过放置 `trade_block` 打开交易界面，用
 }
 ```
 
-### 字段说明
+### Field Reference
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `group` | string | 分组名称 |
-| `input` | string | 输入物品 ID |
-| `output` | string | 输出物品 ID |
-| `inputNbt` | string? | 输入物品 NBT 匹配条件 |
-| `outputNbt` | string? | 输出物品 NBT |
-| `nbtMatchMode` | string | NBT 匹配模式：`exact`/`contains`/`ignore` |
-| `inputCount` | int | 消耗数量，范围 1~64 |
-| `outputCount` | int | 获得数量，范围 1~64 |
-| `xpReward` | int | 经验奖励，≥ 0 |
+| Field | Type | Description |
+|-------|------|-------------|
+| `group` | string | Group name |
+| `input` | string | Input item ID |
+| `output` | string | Output item ID |
+| `inputNbt` | string? | Input item NBT match condition |
+| `outputNbt` | string? | Output item NBT |
+| `nbtMatchMode` | string | NBT match mode: `exact`/`contains`/`ignore` |
+| `inputCount` | int | Consume amount, range 1~64 |
+| `outputCount` | int | Receive amount, range 1~64 |
+| `xpReward` | int | XP reward, ≥ 0 |
 
-### NBT 匹配模式
+### NBT Match Modes
 
-- `exact` - 完全匹配 NBT（默认）
-- `contains` - 输入物品包含指定 NBT 标签即可
-- `ignore` - 忽略输入物品 NBT
+- `exact` - Exact NBT match (default)
+- `contains` - Input item contains specified NBT tags
+- `ignore` - Ignore input item NBT
 
-### 配置验证
+### Config Validation
 
-加载时自动：
+On load, automatically:
 
-- 过滤无效物品 ID
-- 验证 NBT 语法
-- 限制数量范围 1~64
-- 去重重复交易
-- 空配置回退默认值
+- Filter invalid item IDs
+- Validate NBT syntax
+- Limit count range 1~64
+- Deduplicate trades
+- Fallback to defaults for empty config
 
-### 限制
+### Limits
 
-- 最大分组数：128
-- 每组最大交易数：1024
-- 物品 ID 最大长度：128 字符
-- 分组名最大长度：64 字符
-- NBT 最大长度：4096 字符
+- Max groups: 128
+- Max trades per group: 1024
+- Max item ID length: 128 chars
+- Max group name length: 64 chars
+- Max NBT length: 4096 chars
 
-## 技术细节
+## Technical Details
 
-- 交易执行由服务端负责，防止客户端伪造
-- 玩家加入时自动同步交易配置
-- 配置更新后自动同步在线玩家
-- 客户端断开时清空本地缓存
-- `trade_block` 包含完整资源链（配方、模型、语言文件、掉落表）
+- Trade execution handled server-side, prevents client spoofing
+- Auto-sync trade config on player join
+- Auto-sync to online players after config update
+- Clear local cache on client disconnect
+- `trade_block` has complete resource chain (recipe, model, lang files, loot table)
 
-## 依赖
+## Dependencies
 
-| 依赖 | 版本 |
-|------|------|
+| Dependency | Version |
+|------------|---------|
 | Minecraft | 1.20.1 |
 | Fabric Loader | 0.14.23 |
 | Fabric API | 0.90.4+1.20.1 |
 | Java | 17 |
 
-## 许可证
+## License
 
 MIT
